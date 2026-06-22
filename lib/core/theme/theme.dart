@@ -24,7 +24,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: GoogleFonts.poppinsTextTheme().toString(),
+      fontFamily: GoogleFonts.poppins().fontFamily,
 
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
@@ -37,44 +37,44 @@ class AppTheme {
         onError: Colors.white,
       ),
 
-      textTheme: const TextTheme(
-        headlineMedium: TextStyle(
+      textTheme: TextTheme(
+        headlineMedium: GoogleFonts.poppins(
           fontSize: 28,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
           height: 1.2,
         ),
-        titleLarge: TextStyle(
+        titleLarge: GoogleFonts.poppins(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
           height: 1.3,
         ),
-        titleSmall: TextStyle(
+        titleSmall: GoogleFonts.poppins(
           fontSize: 15,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
           height: 1.3,
         ),
-        bodyLarge: TextStyle(
+        bodyLarge: GoogleFonts.poppins(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
           height: 1.5,
         ),
-        bodyMedium: TextStyle(
+        bodyMedium: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
           height: 1.4,
         ),
-        labelSmall: TextStyle(
+        labelSmall: GoogleFonts.poppins(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: AppColors.textTertiary,
           height: 1.3,
         ),
-        labelLarge: TextStyle(
+        labelLarge: GoogleFonts.poppins(
           fontSize: 15,
           fontWeight: FontWeight.w600,
           color: AppColors.onPrimary,
@@ -126,4 +126,11 @@ class AppTheme {
       ),
     );
   }
+}
+
+class AppSpacing {
+  AppSpacing._();
+
+  static const EdgeInsets screenPaddingHorizontal =
+      EdgeInsets.symmetric(horizontal: 30);
 }

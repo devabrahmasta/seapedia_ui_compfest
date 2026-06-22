@@ -15,6 +15,22 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, Session?>(() {
   return AuthNotifier();
 });
 
+final userRolesProvider = FutureProvider<List<String>>((ref) async {
+  final session = ref.watch(authProvider).value;
+  if (session == null) return [];
+  final repository = ref.watch(profileRepositoryProvider);
+  return repository.getUserRoles(session.user.id);
+});
+
+final setActiveRoleProvider = Provider((ref) {
+  return (String role) async {
+    final session = ref.read(authProvider).value;
+    if (session == null) return;
+    final repository = ref.read(profileRepositoryProvider);
+    await repository.setActiveRole(userId: session.user.id, role: role);
+  };
+});
+
 class AuthNotifier extends AsyncNotifier<Session?> {
   @override
   Future<Session?> build() async {

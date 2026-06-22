@@ -22,11 +22,23 @@ class ProfileRepository {
     required Set<String> roles,
   }) {
     final rows = roles
-        .map((role) => {
-              'user_id': userId,
-              'role': role,
-            })
+        .map((role) => {'user_id': userId, 'role': role})
         .toList();
     return _client.from('user_roles').insert(rows);
+  }
+
+  Future<List<String>> getUserRoles(String userId) async {
+    final response = await _client
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+    return (response as List).map((row) => row['role'] as String).toList();
+  }
+
+  Future<void> setActiveRole({required String userId, required String role}) {
+    return _client
+        .from('profiles')
+        .update({'active_role': role})
+        .eq('id', userId);
   }
 }

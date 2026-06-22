@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
@@ -103,7 +104,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+          padding: AppSpacing.screenPaddingHorizontal,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -193,7 +194,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 8),
                 Text(
                   _validationError!,
-                  style: const TextStyle(color: Colors.red),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelMedium?.copyWith(color: Colors.red),
                 ),
               ],
               const SizedBox(height: 24),
