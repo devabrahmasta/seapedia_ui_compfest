@@ -16,10 +16,9 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
+            onPressed: () async {
+              await ref.read(authProvider.notifier).signOut();
               ref.read(activeRoleProvider.notifier).clear();
-              ref.read(authProvider.notifier).signOut();
-              context.go('/login');
             },
           ),
         ],
@@ -29,5 +28,4 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
