@@ -22,13 +22,31 @@ final userRolesProvider = FutureProvider<List<String>>((ref) async {
   return repository.getUserRoles(session.user.id);
 });
 
-final setActiveRoleProvider = Provider((ref) {
-  return (String role) async {
+class ActiveRoleNotifier extends AsyncNotifier<String?> {
+  @override
+  Future<String?> build() async {
+    final session = ref.watch(authProvider).value;
+    if (session == null) return null;
+    final repository = ref.watch(profileRepositoryProvider);
+    return repository.getActiveRole(session.user.id);
+  }
+
+  Future<void> setRole(String role) async {
     final session = ref.read(authProvider).value;
     if (session == null) return;
+
+    state = AsyncData(role);
     final repository = ref.read(profileRepositoryProvider);
     await repository.setActiveRole(userId: session.user.id, role: role);
-  };
+  }
+
+  void clear() {
+    state = const AsyncData(null);
+  }
+}
+
+final activeRoleProvider = AsyncNotifierProvider<ActiveRoleNotifier, String?>(() {
+  return ActiveRoleNotifier();
 });
 
 class AuthNotifier extends AsyncNotifier<Session?> {
@@ -41,7 +59,10 @@ class AuthNotifier extends AsyncNotifier<Session?> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(authRepositoryProvider);
-      final response = await repository.signIn(email: email, password: password);
+      final response = await repository.signIn(
+        email: email,
+        password: password,
+      );
       return response.session;
     });
   }
@@ -67,7 +88,10 @@ class AuthNotifier extends AsyncNotifier<Session?> {
       final authRepository = ref.read(authRepositoryProvider);
       final profileRepository = ref.read(profileRepositoryProvider);
 
-      final response = await authRepository.signUp(email: email, password: password);
+      final response = await authRepository.signUp(
+        email: email,
+        password: password,
+      );
       final userId = response.user!.id;
 
       await profileRepository.createProfile(

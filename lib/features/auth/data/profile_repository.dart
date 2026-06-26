@@ -41,4 +41,13 @@ class ProfileRepository {
         .update({'active_role': role})
         .eq('id', userId);
   }
+
+  Future<String?> getActiveRole(String userId) async {
+    final response = await _client
+        .from('profiles')
+        .select('active_role')
+        .eq('id', userId)
+        .single();
+    return response['active_role'] as String?;
+  }
 }

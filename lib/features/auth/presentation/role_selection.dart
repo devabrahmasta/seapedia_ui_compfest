@@ -55,13 +55,11 @@ class RoleSelectionScreen extends StatelessWidget {
               const SizedBox(height: 32),
               Text(
                 'Pilih peran untuk sesi ini',
-                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               Text(
                 'Akun kamu punya beberapa peran. Pilih satu untuk lanjut.',
-                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 24),
@@ -89,9 +87,9 @@ class _RoleCard extends ConsumerWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () async {
-        await ref.read(setActiveRoleProvider)(option.role);
+        await ref.read(activeRoleProvider.notifier).setRole(option.role);
         if (context.mounted) {
-          context.go('/${option.role}');
+          context.go('/');
         }
       },
       child: Container(
@@ -116,8 +114,14 @@ class _RoleCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(option.title, style: Theme.of(context).textTheme.titleSmall),
-                  Text(option.description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    option.title,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    option.description,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
               ),
             ),
