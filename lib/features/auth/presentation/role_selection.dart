@@ -18,7 +18,7 @@ class RoleOption {
   });
 }
 
-class RoleSelectionScreen extends StatelessWidget {
+class RoleSelectionScreen extends ConsumerWidget {
   const RoleSelectionScreen({super.key});
 
   static const roleOptions = [
@@ -43,34 +43,48 @@ class RoleSelectionScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userRolesAsync = ref.watch(userRolesProvider);
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: AppSpacing.screenPaddingHorizontal,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32),
-              Text(
-                'Pilih peran untuk sesi ini',
-                style: Theme.of(context).textTheme.titleLarge,
+        child: userRolesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Gagal memuat peran')),
+          data: (ownedRoles) {
+            final availableOptions = roleOptions
+                .where((opt) => ownedRoles.contains(opt.role))
+                .toList();
+
+            return Padding(
+              padding: AppSpacing.screenPaddingHorizontal,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 32),
+                  Text(
+                    'Pilih peran untuk sesi ini',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Akun kamu punya beberapa peran. Pilih satu untuk lanjut.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  ...availableOptions.map(
+                    (option) => Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _RoleCard(option: option),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                'Akun kamu punya beberapa peran. Pilih satu untuk lanjut.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              ...roleOptions.map(
-                (option) => Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: _RoleCard(option: option),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

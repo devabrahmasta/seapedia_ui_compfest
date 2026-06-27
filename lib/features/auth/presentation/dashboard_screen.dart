@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {

@@ -35,7 +35,7 @@ class ProfileRepository {
     return (response as List).map((row) => row['role'] as String).toList();
   }
 
-  Future<void> setActiveRole({required String userId, required String role}) {
+  Future<void> setActiveRole({required String userId, required String? role}) {
     return _client
         .from('profiles')
         .update({'active_role': role})

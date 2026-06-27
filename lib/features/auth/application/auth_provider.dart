@@ -27,8 +27,22 @@ class ActiveRoleNotifier extends AsyncNotifier<String?> {
   Future<String?> build() async {
     final session = ref.watch(authProvider).value;
     if (session == null) return null;
-    final repository = ref.watch(profileRepositoryProvider);
-    return repository.getActiveRole(session.user.id);
+
+    final profileRepository = ref.watch(profileRepositoryProvider);
+    final existingRole = await profileRepository.getActiveRole(session.user.id);
+    if (existingRole != null) return existingRole;
+
+    final ownedRoles = await profileRepository.getUserRoles(session.user.id);
+    if (ownedRoles.length == 1) {
+      final onlyRole = ownedRoles.first;
+      await profileRepository.setActiveRole(
+        userId: session.user.id,
+        role: onlyRole,
+      );
+      return onlyRole;
+    }
+
+    return null;
   }
 
   Future<void> setRole(String role) async {
@@ -45,9 +59,11 @@ class ActiveRoleNotifier extends AsyncNotifier<String?> {
   }
 }
 
-final activeRoleProvider = AsyncNotifierProvider<ActiveRoleNotifier, String?>(() {
-  return ActiveRoleNotifier();
-});
+final activeRoleProvider = AsyncNotifierProvider<ActiveRoleNotifier, String?>(
+  () {
+    return ActiveRoleNotifier();
+  },
+);
 
 class AuthNotifier extends AsyncNotifier<Session?> {
   @override
@@ -69,11 +85,13 @@ class AuthNotifier extends AsyncNotifier<Session?> {
 
   Future<void> signOut() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    try {
       final repository = ref.read(authRepositoryProvider);
       await repository.signOut();
-      return null;
-    });
+    } catch (_) {
+    } finally {
+      state = const AsyncData(null);
+    }
   }
 
   Future<void> registerWithRoles({
@@ -83,6 +101,14 @@ class AuthNotifier extends AsyncNotifier<Session?> {
     required String fullName,
     required Set<String> roles,
   }) async {
+    if (roles.isEmpty) {
+      state = AsyncError(
+        Exception('Pilih minimal satu peran.'),
+        StackTrace.current,
+      );
+      return;
+    }
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final authRepository = ref.read(authRepositoryProvider);

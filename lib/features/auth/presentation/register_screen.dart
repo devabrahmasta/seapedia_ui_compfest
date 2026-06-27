@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
+import 'package:seapedia_ui_compfest/core/utils/auth_error_mapper.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -87,10 +87,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     ref.listen(authProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
-        final error = next.error;
-        final message = error is AuthException
-            ? error.message
-            : 'Registrasi gagal';
+        final message = mapAuthError(next.error!);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));
