@@ -11,6 +11,7 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.d
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_listing_screen.dart';
+import 'package:seapedia_ui_compfest/features/reviews/presentation/write_review_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -51,7 +52,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = session != null;
       final path = state.matchedLocation;
       final isAuthPage = path == '/login' || path == '/register';
-      final isPublicPage = path == '/' || path.startsWith('/product');
+      final isPublicPage =
+          path == '/' || path.startsWith('/product') || path == '/write-review';
 
       if (authState.isLoading && !authState.hasValue) return null;
 
@@ -98,6 +100,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final autofocus = state.uri.queryParameters['focus'] == 'true';
           return ProductListingScreen(autofocus: autofocus);
         },
+      ),
+      GoRoute(
+        path: '/write-review',
+        builder: (context, state) => const WriteReviewScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
