@@ -10,6 +10,7 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
+import 'package:seapedia_ui_compfest/features/product/presentation/product_listing_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -89,6 +90,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ProductDetailScreen(productId: id);
+        },
+      ),
+      GoRoute(
+        path: '/products',
+        builder: (context, state) {
+          final autofocus = state.uri.queryParameters['focus'] == 'true';
+          return ProductListingScreen(autofocus: autofocus);
         },
       ),
       StatefulShellRoute.indexedStack(

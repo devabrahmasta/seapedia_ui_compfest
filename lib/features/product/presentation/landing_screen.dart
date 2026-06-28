@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_card.dart';
+import 'package:seapedia_ui_compfest/core/widgets/app_search_bar.dart';
 import 'package:seapedia_ui_compfest/core/widgets/product_card.dart';
 import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
 import 'package:seapedia_ui_compfest/features/reviews/data/review_dummy.dart';
@@ -23,7 +25,7 @@ class LandingScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: AppColors.textPrimary),
-            onPressed: () {},
+            onPressed: () => context.push('/products?focus=true'),
           ),
           Stack(
             alignment: Alignment.center,
@@ -64,9 +66,12 @@ class LandingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            const Padding(
+            Padding(
               padding: AppSpacing.screenPaddingHorizontal,
-              child: _SearchBarPlaceholder(),
+              child: AppSearchBar(
+                readOnly: true,
+                onTap: () => context.push('/products?focus=true'),
+              ),
             ),
             const SizedBox(height: 24),
             const Padding(
@@ -93,10 +98,13 @@ class LandingScreen extends StatelessWidget {
                     'Produk populer',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  Text(
-                    'Lihat semua',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                  GestureDetector(
+                    onTap: () => context.push('/products'),
+                    child: Text(
+                      'Lihat semua',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -115,37 +123,6 @@ class LandingScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const _ReviewCarousel(),
             const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchBarPlaceholder extends StatelessWidget {
-  const _SearchBarPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(28),
-      onTap: () {},
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(28),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.search, color: AppColors.textTertiary, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              'Cari produk atau toko',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textTertiary),
-            ),
           ],
         ),
       ),
@@ -257,7 +234,7 @@ class _ReviewCarousel extends StatelessWidget {
         padding: AppSpacing.screenPaddingHorizontal,
         scrollDirection: Axis.horizontal,
         itemCount: dummyReviews.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 16),
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final review = dummyReviews[index];
 
