@@ -43,18 +43,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     ref.listen(authProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
-        final message = mapAuthError(next.error!);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        final error = next.error;
+        if (error != null) {
+          final message = mapAuthError(error);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        }
       }
     });
 
     final isLoading = ref.watch(authProvider).isLoading;
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
+  body: SafeArea(
+    child: Stack(
+      children: [
+        Padding(
           padding: AppSpacing.screenPaddingHorizontal,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -107,7 +112,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ),
-      ),
-    );
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => context.go('/'),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
   }
 }
