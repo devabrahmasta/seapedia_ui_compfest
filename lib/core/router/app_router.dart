@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
@@ -6,9 +9,32 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/login_screen.dar
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
+  final refreshController = StreamController<void>.broadcast();
+
+  ref.listen(authProvider, (previous, next) => refreshController.add(null));
+  ref.listen(activeRoleProvider, (previous, next) => refreshController.add(null));
+
+  ref.onDispose(() => refreshController.close());
+
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/',
+    refreshListenable: GoRouterRefreshStream(refreshController.stream),
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final activeRoleState = ref.read(activeRoleProvider);
@@ -27,20 +53,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      if (isLoggedIn && isAuthPage) {
-        return '/';
-      }
-
       if (activeRoleState.isLoading && !activeRoleState.hasValue) {
         return null;
       }
 
-      if (path == '/select-role') {
-        return null;
+      if (activeRole == null) {
+        if (path == '/select-role') return null;
+        return '/select-role';
       }
 
-      if (activeRole == null) {
-        return '/select-role';
+      if (isAuthPage || path == '/select-role') {
+        return '/';
       }
 
       return null;

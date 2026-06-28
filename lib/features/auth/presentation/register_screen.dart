@@ -202,11 +202,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 onPressed: isLoading ? null : _handleRegister,
               ),
               const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: () => context.go('/login'),
-                  child: const Text('Sudah punya akun? Masuk'),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Sudah punya akun?',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Masuk'),
+                  ),
+                ],
               ),
             ],
           ),

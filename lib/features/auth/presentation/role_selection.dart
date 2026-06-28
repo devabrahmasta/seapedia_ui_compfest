@@ -50,7 +50,8 @@ class RoleSelectionScreen extends ConsumerWidget {
       body: SafeArea(
         child: userRolesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(child: Text('Gagal memuat peran')),
+          error: (err, stack) =>
+              const Center(child: Text('Gagal memuat peran')),
           data: (ownedRoles) {
             final availableOptions = roleOptions
                 .where((opt) => ownedRoles.contains(opt.role))
@@ -65,13 +66,11 @@ class RoleSelectionScreen extends ConsumerWidget {
                   const SizedBox(height: 32),
                   Text(
                     'Pilih peran untuk sesi ini',
-                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Akun kamu punya beberapa peran. Pilih satu untuk lanjut.',
-                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 24),
@@ -91,21 +90,33 @@ class RoleSelectionScreen extends ConsumerWidget {
   }
 }
 
-class _RoleCard extends ConsumerWidget {
+class _RoleCard extends ConsumerStatefulWidget {
   final RoleOption option;
 
   const _RoleCard({required this.option});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RoleCard> createState() => _RoleCardState();
+}
+
+class _RoleCardState extends ConsumerState<_RoleCard> {
+  bool _isLoading = false;
+
+  Future<void> _handleTap() async {
+    setState(() => _isLoading = true);
+
+    await ref.read(activeRoleProvider.notifier).setRole(widget.option.role);
+
+    if (mounted) {
+      context.go('/');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        await ref.read(activeRoleProvider.notifier).setRole(option.role);
-        if (context.mounted) {
-          context.go('/');
-        }
-      },
+      onTap: _isLoading ? null : _handleTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -121,7 +132,12 @@ class _RoleCard extends ConsumerWidget {
                 color: AppColors.primarySurface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(option.icon, color: AppColors.primary),
+              child: _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(widget.option.icon, color: AppColors.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -129,11 +145,11 @@ class _RoleCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    option.title,
+                    widget.option.title,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   Text(
-                    option.description,
+                    widget.option.description,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

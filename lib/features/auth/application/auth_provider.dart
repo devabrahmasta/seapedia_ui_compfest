@@ -29,20 +29,7 @@ class ActiveRoleNotifier extends AsyncNotifier<String?> {
     if (session == null) return null;
 
     final profileRepository = ref.watch(profileRepositoryProvider);
-    final existingRole = await profileRepository.getActiveRole(session.user.id);
-    if (existingRole != null) return existingRole;
-
-    final ownedRoles = await profileRepository.getUserRoles(session.user.id);
-    if (ownedRoles.length == 1) {
-      final onlyRole = ownedRoles.first;
-      await profileRepository.setActiveRole(
-        userId: session.user.id,
-        role: onlyRole,
-      );
-      return onlyRole;
-    }
-
-    return null;
+    return profileRepository.getActiveRole(session.user.id);
   }
 
   Future<void> setRole(String role) async {
@@ -52,10 +39,6 @@ class ActiveRoleNotifier extends AsyncNotifier<String?> {
     state = AsyncData(role);
     final repository = ref.read(profileRepositoryProvider);
     await repository.setActiveRole(userId: session.user.id, role: role);
-  }
-
-  void clear() {
-    state = const AsyncData(null);
   }
 }
 
@@ -79,6 +62,16 @@ class AuthNotifier extends AsyncNotifier<Session?> {
         email: email,
         password: password,
       );
+
+      final profileRepo = ref.read(profileRepositoryProvider);
+      final roles = await profileRepo.getUserRoles(response.user!.id);
+
+      if (roles.length == 1) {
+        await profileRepo.setActiveRole(userId: response.user!.id, role: roles.first);
+      } else {
+        await profileRepo.setActiveRole(userId: response.user!.id, role: null);
+      }
+
       return response.session;
     });
   }
@@ -106,7 +99,7 @@ class AuthNotifier extends AsyncNotifier<Session?> {
         Exception('Pilih minimal satu peran.'),
         StackTrace.current,
       );
-      return;
+      return; 
     }
 
     state = const AsyncLoading();
@@ -126,6 +119,12 @@ class AuthNotifier extends AsyncNotifier<Session?> {
         fullName: fullName,
       );
       await profileRepository.insertUserRoles(userId: userId, roles: roles);
+
+      if (roles.length == 1) {
+        await profileRepository.setActiveRole(userId: userId, role: roles.first);
+      } else {
+        await profileRepository.setActiveRole(userId: userId, role: null);
+      }
 
       return response.session;
     });

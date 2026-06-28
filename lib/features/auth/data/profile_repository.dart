@@ -47,7 +47,7 @@ class ProfileRepository {
         .from('profiles')
         .select('active_role')
         .eq('id', userId)
-        .single();
-    return response['active_role'] as String?;
+        .maybeSingle();
+    return response?['active_role'] as String?;
   }
 }

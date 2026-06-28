@@ -44,7 +44,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen(authProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
         final message = mapAuthError(next.error!);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     });
 
@@ -89,11 +91,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: isLoading ? null : _handleLogin,
               ),
               const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: () => context.go('/register'),
-                  child: const Text('Belum punya akun? Daftar'),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Belum punya akun?',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                  TextButton(
+                    onPressed: () => context.go('/register'),
+                    child: const Text('Daftar'),
+                  ),
+                ],
               ),
             ],
           ),
