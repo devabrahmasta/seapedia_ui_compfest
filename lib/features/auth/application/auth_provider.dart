@@ -67,7 +67,10 @@ class AuthNotifier extends AsyncNotifier<Session?> {
       final roles = await profileRepo.getUserRoles(response.user!.id);
 
       if (roles.length == 1) {
-        await profileRepo.setActiveRole(userId: response.user!.id, role: roles.first);
+        await profileRepo.setActiveRole(
+          userId: response.user!.id,
+          role: roles.first,
+        );
       } else {
         await profileRepo.setActiveRole(userId: response.user!.id, role: null);
       }
@@ -99,7 +102,7 @@ class AuthNotifier extends AsyncNotifier<Session?> {
         Exception('Pilih minimal satu peran.'),
         StackTrace.current,
       );
-      return; 
+      return;
     }
 
     state = const AsyncLoading();
@@ -121,7 +124,10 @@ class AuthNotifier extends AsyncNotifier<Session?> {
       await profileRepository.insertUserRoles(userId: userId, roles: roles);
 
       if (roles.length == 1) {
-        await profileRepository.setActiveRole(userId: userId, role: roles.first);
+        await profileRepository.setActiveRole(
+          userId: userId,
+          role: roles.first,
+        );
       } else {
         await profileRepository.setActiveRole(userId: userId, role: null);
       }

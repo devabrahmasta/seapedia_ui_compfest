@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:intl/intl.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_card.dart';
+import 'package:seapedia_ui_compfest/core/widgets/product_card.dart';
 import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
 import 'package:seapedia_ui_compfest/features/reviews/data/review_dummy.dart';
 
@@ -105,7 +105,6 @@ class LandingScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const _PopularProductsGrid(),
             const SizedBox(height: 32),
-
             Padding(
               padding: AppSpacing.screenPaddingHorizontal,
               child: Text(
@@ -230,8 +229,6 @@ class _PopularProductsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat('#,###', 'id_ID');
-
     return Padding(
       padding: AppSpacing.screenPaddingHorizontal,
       child: MasonryGridView.count(
@@ -242,63 +239,7 @@ class _PopularProductsGrid extends StatelessWidget {
         crossAxisSpacing: 16,
         itemCount: dummyProducts.length,
         itemBuilder: (context, index) {
-          final product = dummyProducts[index];
-
-          return AppCard(
-            padding: EdgeInsets.zero,
-            onTap: () {},
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Gambar tetap kotak presisi (1:1)
-                AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                      image: DecorationImage(
-                        image: NetworkImage(product.imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.name,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleSmall?.copyWith(fontSize: 14),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product.storeName,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Rp${currencyFormat.format(product.price)}',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
+          return ProductCard(product: dummyProducts[index]);
         },
       ),
     );
@@ -316,7 +257,7 @@ class _ReviewCarousel extends StatelessWidget {
         padding: AppSpacing.screenPaddingHorizontal,
         scrollDirection: Axis.horizontal,
         itemCount: dummyReviews.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final review = dummyReviews[index];
 

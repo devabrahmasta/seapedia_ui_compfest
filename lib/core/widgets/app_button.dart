@@ -17,9 +17,7 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        shape: const StadiumBorder(),
-      ),
+      style: ElevatedButton.styleFrom(shape: const StadiumBorder()),
       child: isLoading
           ? const SizedBox(
               height: 20,

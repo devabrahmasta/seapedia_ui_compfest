@@ -45,7 +45,9 @@ class _AppTextFieldState extends State<AppTextField> {
         suffixIcon: isPasswordField
             ? IconButton(
                 icon: Icon(
-                  _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   size: 20,
                 ),
                 onPressed: () {

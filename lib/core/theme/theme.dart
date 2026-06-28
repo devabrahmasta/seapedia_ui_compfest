@@ -93,7 +93,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: const BorderSide(color: AppColors.border, width: 1),
@@ -131,6 +134,7 @@ class AppTheme {
 class AppSpacing {
   AppSpacing._();
 
-  static const EdgeInsets screenPaddingHorizontal =
-      EdgeInsets.symmetric(horizontal: 30);
+  static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(
+    horizontal: 25,
+  );
 }

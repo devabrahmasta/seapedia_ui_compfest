@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
@@ -8,6 +8,8 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/login_screen.dar
 import 'package:seapedia_ui_compfest/features/auth/presentation/main_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
+import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
+import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -28,7 +30,10 @@ final routerProvider = Provider<GoRouter>((ref) {
   final refreshController = StreamController<void>.broadcast();
 
   ref.listen(authProvider, (previous, next) => refreshController.add(null));
-  ref.listen(activeRoleProvider, (previous, next) => refreshController.add(null));
+  ref.listen(
+    activeRoleProvider,
+    (previous, next) => refreshController.add(null),
+  );
 
   ref.onDispose(() => refreshController.close());
 
@@ -45,11 +50,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = session != null;
       final path = state.matchedLocation;
       final isAuthPage = path == '/login' || path == '/register';
+      final isPublicPage = path == '/' || path.startsWith('/product');
 
       if (authState.isLoading && !authState.hasValue) return null;
 
       if (!isLoggedIn) {
-        if (isAuthPage) return null;
+        if (isAuthPage || isPublicPage) return null;
         return '/login';
       }
 
@@ -69,10 +75,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -82,8 +85,62 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RoleSelectionScreen(),
       ),
       GoRoute(
-        path: '/',
-        builder: (context, state) => const MainScreen(),
+        path: '/product/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ProductDetailScreen(productId: id);
+        },
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const LandingScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                builder: (context, state) =>
+                    const Center(child: Text('Search Page')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/cart',
+                builder: (context, state) =>
+                    const Center(child: Text('Cart Page')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/orders',
+                builder: (context, state) =>
+                    const Center(child: Text('Orders Page')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) =>
+                    const Center(child: Text('Profile Page')),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
