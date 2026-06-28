@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
-import 'package:seapedia_ui_compfest/features/auth/presentation/dashboard_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/login_screen.dart';
+import 'package:seapedia_ui_compfest/features/auth/presentation/main_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
 
@@ -83,7 +83,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) => const DashboardScreen(),
+        builder: (context, state) => const MainScreen(),
       ),
     ],
   );
