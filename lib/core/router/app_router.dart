@@ -12,6 +12,8 @@ import 'package:seapedia_ui_compfest/features/product/presentation/landing_scree
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_listing_screen.dart';
 import 'package:seapedia_ui_compfest/features/reviews/presentation/write_review_screen.dart';
+import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
+import 'package:seapedia_ui_compfest/features/store/presentation/store_setup_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -36,6 +38,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     activeRoleProvider,
     (previous, next) => refreshController.add(null),
   );
+  ref.listen(myStoreProvider, (previous, next) => refreshController.add(null));
 
   ref.onDispose(() => refreshController.close());
 
@@ -71,6 +74,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/select-role';
       }
 
+      if (activeRole == 'seller' && path != '/store-setup') {
+        final storeState = ref.read(myStoreProvider);
+        if (storeState.isLoading && !storeState.hasValue) return null;
+        if (storeState.value == null) return '/store-setup';
+      }
+
       if (isAuthPage || path == '/select-role') {
         return '/';
       }
@@ -104,6 +113,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/write-review',
         builder: (context, state) => const WriteReviewScreen(),
+      ),
+      GoRoute(
+        path: '/store-setup',
+        builder: (context, state) => const StoreSetupScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
