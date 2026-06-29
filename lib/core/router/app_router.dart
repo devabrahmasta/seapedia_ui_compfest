@@ -20,7 +20,11 @@ import 'package:seapedia_ui_compfest/features/reviews/presentation/write_review_
 import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
 import 'package:seapedia_ui_compfest/features/store/presentation/store_public_screen.dart';
 import 'package:seapedia_ui_compfest/features/store/presentation/store_setup_screen.dart';
+import 'package:seapedia_ui_compfest/features/address/data/address_repository.dart';
+import 'package:seapedia_ui_compfest/features/address/presentation/address_form_screen.dart';
+import 'package:seapedia_ui_compfest/features/address/presentation/address_list_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
+import 'package:seapedia_ui_compfest/features/wallet/presentation/wallet_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -145,6 +149,28 @@ final routerProvider = Provider<GoRouter>((ref) {
           final storeId = state.pathParameters['id']!;
           return StorePublicScreen(storeId: storeId);
         },
+      ),
+
+      GoRoute(
+        path: '/wallet',
+        builder: (context, state) => const WalletScreen(),
+      ),
+      GoRoute(
+        path: '/addresses',
+        builder: (context, state) => const AddressListScreen(),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const AddressFormScreen(),
+          ),
+          GoRoute(
+            path: ':id/edit',
+            builder: (context, state) {
+              final address = state.extra as Address;
+              return AddressFormScreen(existingAddress: address);
+            },
+          ),
+        ],
       ),
 
       // Buyer mainscreen
