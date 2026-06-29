@@ -4,20 +4,20 @@ class Wallet {
   final String id;
   final String userId;
   final double balance;
-  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const Wallet({
     required this.id,
     required this.userId,
     required this.balance,
-    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Wallet.fromJson(Map<String, dynamic> json) => Wallet(
     id: json['id'] as String,
     userId: json['user_id'] as String,
     balance: (json['balance'] as num).toDouble(),
-    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
   );
 }
 
@@ -26,7 +26,6 @@ class WalletTransaction {
   final String walletId;
   final String type;
   final double amount;
-  final String? description;
   final DateTime createdAt;
 
   const WalletTransaction({
@@ -34,11 +33,25 @@ class WalletTransaction {
     required this.walletId,
     required this.type,
     required this.amount,
-    this.description,
     required this.createdAt,
   });
 
-  bool get isTopUp => type == 'top_up';
+  bool get isTopUp => type == 'topup';
+
+  String get displayLabel {
+    switch (type) {
+      case 'topup':
+        return 'Top Up Saldo';
+      case 'checkout':
+        return 'Pembayaran Pesanan';
+      case 'refund':
+        return 'Pengembalian Dana';
+      case 'driver_earning':
+        return 'Pendapatan Kurir';
+      default:
+        return type;
+    }
+  }
 
   factory WalletTransaction.fromJson(Map<String, dynamic> json) =>
       WalletTransaction(
@@ -46,7 +59,6 @@ class WalletTransaction {
         walletId: json['wallet_id'] as String,
         type: json['type'] as String,
         amount: (json['amount'] as num).toDouble(),
-        description: json['description'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 }
@@ -88,9 +100,8 @@ class WalletRepository {
 
     await _client.from('wallet_transactions').insert({
       'wallet_id': walletId,
-      'type': 'top_up',
+      'type': 'topup',
       'amount': amount,
-      'description': 'Top Up Saldo',
     });
 
     final data = await _client
@@ -117,15 +128,13 @@ class WalletRepository {
 
     await _client.from('wallet_transactions').insert({
       'wallet_id': walletId,
-      'type': 'payment',
+      'type': 'checkout',
       'amount': amount,
-      'description': 'Pembayaran Pesanan',
+      'reference_id': orderId,
     });
   }
 
-  Future<List<WalletTransaction>> getTransactionHistory(
-    String walletId,
-  ) async {
+  Future<List<WalletTransaction>> getTransactionHistory(String walletId) async {
     final data = await _client
         .from('wallet_transactions')
         .select()

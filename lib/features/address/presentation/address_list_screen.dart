@@ -110,6 +110,8 @@ class _AddressCard extends ConsumerWidget {
                     Text(
                       address.label,
                       style: Theme.of(context).textTheme.titleSmall,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     if (address.isDefault) ...[
                       const SizedBox(width: 8),
@@ -150,7 +152,8 @@ class _AddressCard extends ConsumerWidget {
               color: AppColors.textSecondary,
               size: 20,
             ),
-            onPressed: () => context.push('/addresses/${address.id}/edit'),
+            onPressed: () =>
+                context.push('/addresses/${address.id}/edit', extra: address),
           ),
         ],
       ),

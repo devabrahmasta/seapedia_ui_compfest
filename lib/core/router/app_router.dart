@@ -24,6 +24,7 @@ import 'package:seapedia_ui_compfest/features/address/data/address_repository.da
 import 'package:seapedia_ui_compfest/features/address/presentation/address_form_screen.dart';
 import 'package:seapedia_ui_compfest/features/address/presentation/address_list_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
+import 'package:seapedia_ui_compfest/features/cart/presentation/cart_screen.dart';
 import 'package:seapedia_ui_compfest/features/wallet/presentation/wallet_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -200,8 +201,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/cart',
-                builder: (context, state) =>
-                    const Center(child: Text('Cart Page')),
+                builder: (context, state) => const CartScreen(),
               ),
             ],
           ),

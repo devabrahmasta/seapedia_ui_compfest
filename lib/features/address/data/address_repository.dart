@@ -6,7 +6,6 @@ class Address {
   final String label;
   final String fullAddress;
   final bool isDefault;
-  final DateTime createdAt;
 
   const Address({
     required this.id,
@@ -14,16 +13,14 @@ class Address {
     required this.label,
     required this.fullAddress,
     required this.isDefault,
-    required this.createdAt,
   });
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
     id: json['id'] as String,
-    userId: json['user_id'] as String,
+    userId: json['buyer_id'] as String,
     label: json['label'] as String,
     fullAddress: json['full_address'] as String,
     isDefault: json['is_default'] as bool? ?? false,
-    createdAt: DateTime.parse(json['created_at'] as String),
   );
 }
 
@@ -36,9 +33,8 @@ class AddressRepository {
     final data = await _client
         .from('addresses')
         .select()
-        .eq('user_id', userId)
-        .order('is_default', ascending: false)
-        .order('created_at', ascending: false);
+        .eq('buyer_id', userId)
+        .order('is_default', ascending: false);
 
     return data.map((e) => Address.fromJson(e)).toList();
   }
@@ -54,7 +50,7 @@ class AddressRepository {
     final data = await _client
         .from('addresses')
         .insert({
-          'user_id': userId,
+          'buyer_id': userId,
           'label': label,
           'full_address': fullAddress,
           'is_default': isDefault,
@@ -103,7 +99,7 @@ class AddressRepository {
     await _client
         .from('addresses')
         .update({'is_default': false})
-        .eq('user_id', userId)
+        .eq('buyer_id', userId)
         .eq('is_default', true);
   }
 }

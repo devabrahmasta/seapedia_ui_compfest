@@ -83,10 +83,10 @@ class _WalletContent extends ConsumerWidget {
             }
             return Column(
               children: transactions
-                  .map((t) => _TransactionTile(
-                        transaction: t,
-                        formatter: formatter,
-                      ))
+                  .map(
+                    (t) =>
+                        _TransactionTile(transaction: t, formatter: formatter),
+                  )
                   .toList(),
             );
           },
@@ -153,10 +153,7 @@ class _TransactionTile extends StatelessWidget {
   final WalletTransaction transaction;
   final NumberFormat formatter;
 
-  const _TransactionTile({
-    required this.transaction,
-    required this.formatter,
-  });
+  const _TransactionTile({required this.transaction, required this.formatter});
 
   @override
   Widget build(BuildContext context) {
@@ -188,8 +185,7 @@ class _TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  transaction.description ??
-                      (isTopUp ? 'Top Up' : 'Pembayaran Pesanan'),
+                  transaction.displayLabel,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -199,9 +195,9 @@ class _TransactionTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   _formatDate(transaction.createdAt),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontSize: 12),
                 ),
               ],
             ),
@@ -220,8 +216,18 @@ class _TransactionTile extends StatelessWidget {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agt',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
