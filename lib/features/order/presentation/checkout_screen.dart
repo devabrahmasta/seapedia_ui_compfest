@@ -46,7 +46,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     ref.listen(myAddressesProvider, (_, next) {
       next.whenData((list) {
         if (_selectedAddress == null && list.isNotEmpty && mounted) {
-          setState(() => _selectedAddress = list.first);
+          setState(() => _selectedAddress = list.firstWhere(
+            (a) => a.isDefault,
+            orElse: () => list.first,
+          ));
         }
       });
     });
