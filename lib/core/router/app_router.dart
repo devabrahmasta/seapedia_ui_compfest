@@ -26,6 +26,9 @@ import 'package:seapedia_ui_compfest/features/address/presentation/address_list_
 import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
 import 'package:seapedia_ui_compfest/features/cart/presentation/cart_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/checkout_screen.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/my_orders_screen.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/incoming_orders_screen.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/order_detail_screen.dart';
 import 'package:seapedia_ui_compfest/features/wallet/presentation/wallet_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -102,7 +105,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (!path.startsWith('/seller') &&
             path != '/store-setup' &&
             !path.startsWith('/product') &&
-            !path.startsWith('/store/')) {
+            !path.startsWith('/store/') &&
+            !path.startsWith('/order/')) {
           return '/seller/dashboard';
         }
       }
@@ -162,6 +166,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CheckoutScreen(),
       ),
       GoRoute(
+        path: '/order/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return OrderDetailScreen(orderId: id);
+        },
+      ),
+      GoRoute(
         path: '/addresses',
         builder: (context, state) => const AddressListScreen(),
         routes: [
@@ -214,8 +225,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/orders',
-                builder: (context, state) =>
-                    const Center(child: Text('Orders Page')),
+                builder: (context, state) => const MyOrdersScreen(),
               ),
             ],
           ),
@@ -269,8 +279,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/seller/orders',
-                builder: (context, state) =>
-                    const Center(child: Text('Pesanan')),
+                builder: (context, state) => const IncomingOrdersScreen(),
               ),
             ],
           ),

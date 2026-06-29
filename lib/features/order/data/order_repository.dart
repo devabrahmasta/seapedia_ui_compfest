@@ -90,6 +90,107 @@ class OrderItem {
   );
 }
 
+class OrderStatusHistory {
+  final String id;
+  final String orderId;
+  final String status;
+  final DateTime changedAt;
+
+  const OrderStatusHistory({
+    required this.id,
+    required this.orderId,
+    required this.status,
+    required this.changedAt,
+  });
+
+  factory OrderStatusHistory.fromJson(Map<String, dynamic> json) =>
+      OrderStatusHistory(
+        id: json['id'] as String,
+        orderId: json['order_id'] as String,
+        status: json['status'] as String,
+        changedAt: DateTime.parse(json['changed_at'] as String),
+      );
+}
+
+class OrderSummary {
+  final String id;
+  final String storeName;
+  final String? buyerName;
+  final String status;
+  final double total;
+  final DateTime createdAt;
+  final List<String> itemNames;
+
+  const OrderSummary({
+    required this.id,
+    required this.storeName,
+    this.buyerName,
+    required this.status,
+    required this.total,
+    required this.createdAt,
+    required this.itemNames,
+  });
+
+  factory OrderSummary.fromJson(Map<String, dynamic> json) {
+    final storeData = json['stores'] as Map<String, dynamic>?;
+    final profileData = json['profiles'] as Map<String, dynamic>?;
+    final itemsRaw = json['order_items'] as List? ?? [];
+    return OrderSummary(
+      id: json['id'] as String,
+      storeName: storeData?['name'] as String? ?? 'Toko',
+      buyerName: profileData?['full_name'] as String? ??
+          profileData?['username'] as String?,
+      status: json['status'] as String,
+      total: (json['total'] as num).toDouble(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      itemNames: itemsRaw
+          .map((e) => e['product_name_snapshot'] as String)
+          .toList(),
+    );
+  }
+}
+
+class OrderDetail {
+  final Order order;
+  final String storeName;
+  final String addressLabel;
+  final String addressFull;
+  final List<OrderItem> items;
+  final List<OrderStatusHistory> statusHistory;
+
+  const OrderDetail({
+    required this.order,
+    required this.storeName,
+    required this.addressLabel,
+    required this.addressFull,
+    required this.items,
+    required this.statusHistory,
+  });
+
+  factory OrderDetail.fromJson(Map<String, dynamic> json) {
+    final storeData = json['stores'] as Map<String, dynamic>?;
+    final addressData = json['addresses'] as Map<String, dynamic>?;
+    final itemsRaw = json['order_items'] as List? ?? [];
+    final historyRaw = json['order_status_history'] as List? ?? [];
+
+    final history = historyRaw
+        .map((e) => OrderStatusHistory.fromJson(e as Map<String, dynamic>))
+        .toList()
+      ..sort((a, b) => b.changedAt.compareTo(a.changedAt));
+
+    return OrderDetail(
+      order: Order.fromJson(json),
+      storeName: storeData?['name'] as String? ?? 'Toko',
+      addressLabel: addressData?['label'] as String? ?? '',
+      addressFull: addressData?['full_address'] as String? ?? '',
+      items: itemsRaw
+          .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      statusHistory: history,
+    );
+  }
+}
+
 class OrderRepository {
   OrderRepository(this._client);
 
@@ -230,5 +331,40 @@ class OrderRepository {
         .eq('id', cartId);
 
     return Order.fromJson(orderData);
+  }
+
+  Future<List<OrderSummary>> getMyOrders(String buyerId) async {
+    final data = await _client
+        .from('orders')
+        .select('*, stores!store_id(name), order_items(product_name_snapshot)')
+        .eq('buyer_id', buyerId)
+        .order('created_at', ascending: false);
+    return (data as List)
+        .map((e) => OrderSummary.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<OrderSummary>> getIncomingOrders(String storeId) async {
+    final data = await _client
+        .from('orders')
+        .select(
+          '*, profiles!buyer_id(username, full_name), order_items(product_name_snapshot)',
+        )
+        .eq('store_id', storeId)
+        .order('created_at', ascending: false);
+    return (data as List)
+        .map((e) => OrderSummary.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<OrderDetail> getOrderDetail(String orderId) async {
+    final data = await _client
+        .from('orders')
+        .select(
+          '*, stores!store_id(name), addresses!address_id(label, full_address), order_items(*), order_status_history(*)',
+        )
+        .eq('id', orderId)
+        .single();
+    return OrderDetail.fromJson(data);
   }
 }

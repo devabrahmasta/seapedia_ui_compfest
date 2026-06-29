@@ -46,10 +46,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     ref.listen(myAddressesProvider, (_, next) {
       next.whenData((list) {
         if (_selectedAddress == null && list.isNotEmpty && mounted) {
-          setState(() => _selectedAddress = list.firstWhere(
-            (a) => a.isDefault,
-            orElse: () => list.first,
-          ));
+          setState(
+            () => _selectedAddress = list.firstWhere(
+              (a) => a.isDefault,
+              orElse: () => list.first,
+            ),
+          );
         }
       });
     });
@@ -68,7 +70,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat cart: $e')),
         data: (cart) {
-          if (cart.isEmpty) return const Center(child: Text('Keranjang kosong'));
+          if (cart.isEmpty)
+            return const Center(child: Text('Keranjang kosong'));
 
           final subtotal = cart.subtotal;
           final ppn = subtotal * 0.12;
@@ -112,7 +115,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               ),
                               if (i < cart.items.length - 1) ...[
                                 const SizedBox(height: 10),
-                                const Divider(color: AppColors.border, height: 1),
+                                const Divider(
+                                  color: AppColors.border,
+                                  height: 1,
+                                ),
                                 const SizedBox(height: 10),
                               ],
                             ],
@@ -142,7 +148,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Divider(color: AppColors.border, height: 1),
+                              child: Divider(
+                                color: AppColors.border,
+                                height: 1,
+                              ),
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,18 +172,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    walletAsync.maybeWhen(
-                      data: (w) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          'Saldo wallet: ${_fmt.format(w?.balance ?? 0)}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.primary),
-                        ),
-                      ),
-                      orElse: () => const SizedBox.shrink(),
-                    ),
-                    const SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -183,6 +180,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 fmt: _fmt,
                 isLoading: _isLoading,
                 onPay: () => _handleCheckout(cart, total, walletAsync.value),
+                walletAsync: walletAsync,
               ),
             ],
           );
@@ -234,10 +232,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Future<void> _handleCheckout(CartState cart, double total, Wallet? wallet) async {
+  Future<void> _handleCheckout(
+    CartState cart,
+    double total,
+    Wallet? wallet,
+  ) async {
     if (_selectedAddress == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih alamat pengiriman terlebih dahulu')),
+        const SnackBar(
+          content: Text('Pilih alamat pengiriman terlebih dahulu'),
+        ),
       );
       return;
     }
@@ -251,22 +255,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     setState(() => _isLoading = true);
     try {
       final session = ref.read(authProvider).value!;
-      await ref.read(orderRepositoryProvider).checkout(
-        buyerId: session.user.id,
-        cartId: cart.cart!.id,
-        storeId: cart.cart!.storeId!,
-        addressId: _selectedAddress!.id,
-        deliveryMethod: _deliveryMethod,
-        walletId: wallet.id,
-        walletBalance: wallet.balance,
-      );
+      await ref
+          .read(orderRepositoryProvider)
+          .checkout(
+            buyerId: session.user.id,
+            cartId: cart.cart!.id,
+            storeId: cart.cart!.storeId!,
+            addressId: _selectedAddress!.id,
+            deliveryMethod: _deliveryMethod,
+            walletId: wallet.id,
+            walletBalance: wallet.balance,
+          );
       ref.invalidate(cartProvider);
       ref.invalidate(myWalletProvider);
       ref.invalidate(walletTransactionsProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pesanan berhasil dibuat!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pesanan berhasil dibuat!')));
       context.go('/');
     } on InsufficientBalanceException catch (e) {
       if (!mounted) return;
@@ -274,13 +280,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     } on InsufficientStockException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Stok ${e.productName} tidak cukup (tersisa ${e.available})')),
+        SnackBar(
+          content: Text(
+            'Stok ${e.productName} tidak cukup (tersisa ${e.available})',
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Checkout gagal: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Checkout gagal: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -310,7 +320,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Saldo Tidak Cukup', style: Theme.of(ctx).textTheme.titleSmall),
+            Text(
+              'Saldo Tidak Cukup',
+              style: Theme.of(ctx).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Text(
               'Saldo kamu ${_fmt.format(e.balance)}, total belanja ${_fmt.format(e.required)}',
@@ -371,7 +384,11 @@ class _AddressCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          const Icon(Icons.location_on_outlined, size: 20, color: AppColors.primary),
+          const Icon(
+            Icons.location_on_outlined,
+            size: 20,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: address == null
@@ -384,8 +401,9 @@ class _AddressCard extends StatelessWidget {
                     children: [
                       Text(
                         address!.label,
-                        style: Theme.of(context).textTheme.titleSmall
-                            ?.copyWith(fontSize: 14),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleSmall?.copyWith(fontSize: 14),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -396,7 +414,11 @@ class _AddressCard extends StatelessWidget {
                   ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, size: 20, color: AppColors.textTertiary),
+          const Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: AppColors.textTertiary,
+          ),
         ],
       ),
     );
@@ -430,7 +452,11 @@ class _DeliveryCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          const Icon(Icons.local_shipping_outlined, size: 20, color: AppColors.primary),
+          const Icon(
+            Icons.local_shipping_outlined,
+            size: 20,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -438,14 +464,23 @@ class _DeliveryCard extends StatelessWidget {
               children: [
                 Text(
                   _labels[method] ?? method,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 14),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: 2),
-                Text(fmt.format(fee), style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  fmt.format(fee),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, size: 20, color: AppColors.textTertiary),
+          const Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: AppColors.textTertiary,
+          ),
         ],
       ),
     );
@@ -476,8 +511,10 @@ class _ProductRow extends StatelessWidget {
         Expanded(
           child: Text(
             item.productName,
-            style: Theme.of(context).textTheme.bodyLarge
-                ?.copyWith(fontSize: 13, fontWeight: FontWeight.w500),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -508,8 +545,9 @@ class _PriceRow extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium
-              ?.copyWith(color: AppColors.textPrimary),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
         ),
       ],
     );
@@ -523,12 +561,14 @@ class _PayBar extends StatelessWidget {
   final NumberFormat fmt;
   final bool isLoading;
   final VoidCallback onPay;
+  final AsyncValue<Wallet?> walletAsync;
 
   const _PayBar({
     required this.total,
     required this.fmt,
     required this.isLoading,
     required this.onPay,
+    required this.walletAsync,
   });
 
   @override
@@ -537,52 +577,82 @@ class _PayBar extends StatelessWidget {
       color: AppColors.background,
       child: SafeArea(
         child: Padding(
-          padding: AppSpacing.screenPaddingHorizontal
-              .add(const EdgeInsets.only(bottom: 16, top: 12)),
-          child: isLoading
-              ? const AppButton(label: 'Memproses...', onPressed: null)
-              : GestureDetector(
-                  onTap: onPay,
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          fmt.format(total),
-                          style: const TextStyle(
-                            color: AppColors.onPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+          padding: AppSpacing.screenPaddingHorizontal.add(
+            const EdgeInsets.only(bottom: 16, top: 12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  walletAsync.maybeWhen(
+                    data: (w) => Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Text(
+                        'Saldo wallet: ${fmt.format(w?.balance ?? 0)}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textPrimary,
                         ),
-                        Row(
+                      ),
+                    ),
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+              isLoading
+                  ? const AppButton(label: 'Memproses...', onPressed: null)
+                  : GestureDetector(
+                      onTap: onPay,
+                      child: Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Bayar Sekarang',
+                              fmt.format(total),
                               style: const TextStyle(
                                 color: AppColors.onPrimary,
                                 fontSize: 15,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.arrow_forward,
-                              color: AppColors.onPrimary,
-                              size: 18,
+                            Row(
+                              children: [
+                                Text(
+                                  'Bayar Sekarang',
+                                  style: const TextStyle(
+                                    color: AppColors.onPrimary,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  color: AppColors.onPrimary,
+                                  size: 18,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+            ],
+          ),
         ),
       ),
     );
@@ -632,7 +702,9 @@ class _AddressPickerSheet extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   border: Border.all(
-                    color: selected?.id == addr.id ? AppColors.primary : AppColors.border,
+                    color: selected?.id == addr.id
+                        ? AppColors.primary
+                        : AppColors.border,
                     width: selected?.id == addr.id ? 1.5 : 1,
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -647,8 +719,9 @@ class _AddressPickerSheet extends StatelessWidget {
                             children: [
                               Text(
                                 addr.label,
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(fontSize: 14),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall?.copyWith(fontSize: 14),
                               ),
                               if (addr.isDefault) ...[
                                 const SizedBox(width: 8),
@@ -682,7 +755,11 @@ class _AddressPickerSheet extends StatelessWidget {
                       ),
                     ),
                     if (selected?.id == addr.id)
-                      const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                      const Icon(
+                        Icons.check_circle,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                   ],
                 ),
               ),
@@ -732,60 +809,69 @@ class _DeliveryPickerSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Pilih Metode Pengiriman', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 16),
-          ..._methods.map(
-            (entry) {
-              final (key, label, desc) = entry;
-              final isSelected = selected == key;
-              final fee = OrderRepository.deliveryFees[key]!;
-              return GestureDetector(
-                onTap: () => onSelect(key),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.border,
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  label,
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(fontSize: 14),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  fmt.format(fee),
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: AppColors.primary),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(desc, style: Theme.of(context).textTheme.bodyMedium),
-                          ],
-                        ),
-                      ),
-                      if (isSelected)
-                        const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
-                    ],
-                  ),
-                ),
-              );
-            },
+          Text(
+            'Pilih Metode Pengiriman',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
+          const SizedBox(height: 16),
+          ..._methods.map((entry) {
+            final (key, label, desc) = entry;
+            final isSelected = selected == key;
+            final fee = OrderRepository.deliveryFees[key]!;
+            return GestureDetector(
+              onTap: () => onSelect(key),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : AppColors.border,
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                label,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall?.copyWith(fontSize: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                fmt.format(fee),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            desc,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
