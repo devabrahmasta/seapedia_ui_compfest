@@ -51,7 +51,8 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
         description: description.isEmpty ? null : description,
       );
       ref.invalidate(myStoreProvider);
-      if (mounted) context.go('/');
+      await ref.read(myStoreProvider.future);
+      if (mounted) context.go('/seller/dashboard');
     } catch (error) {
       setState(() => _error = mapAuthError(error));
     } finally {
