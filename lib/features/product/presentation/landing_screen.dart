@@ -7,7 +7,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_card.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_search_bar.dart';
 import 'package:seapedia_ui_compfest/core/widgets/product_card.dart';
-import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
+import 'package:seapedia_ui_compfest/features/product/application/product_provider.dart';
 import 'package:seapedia_ui_compfest/features/reviews/application/review_provider.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -211,24 +211,45 @@ class _CategoryList extends StatelessWidget {
   }
 }
 
-class _PopularProductsGrid extends StatelessWidget {
+class _PopularProductsGrid extends ConsumerWidget {
   const _PopularProductsGrid();
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: AppSpacing.screenPaddingHorizontal,
-      child: MasonryGridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        itemCount: dummyProducts.length,
-        itemBuilder: (context, index) {
-          return ProductCard(product: dummyProducts[index]);
-        },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final productsAsync = ref.watch(allProductsProvider);
+
+    return productsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) => Center(
+        child: Text(
+          'Gagal memuat produk',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       ),
+      data: (products) {
+        if (products.isEmpty) {
+          return Center(
+            child: Text(
+              'Belum ada produk',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          );
+        }
+        return Padding(
+          padding: AppSpacing.screenPaddingHorizontal,
+          child: MasonryGridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            itemCount: products.length > 4 ? 4 : products.length,
+            itemBuilder: (context, index) {
+              return ProductCard(product: products[index]);
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -20,3 +20,14 @@ final getProductsByStoreIdProvider =
       final repository = ref.watch(productRepositoryProvider);
       return repository.fetchMyProducts(storeId);
     });
+
+final allProductsProvider = FutureProvider<List<Product>>((ref) async {
+  final repository = ref.watch(productRepositoryProvider);
+  return repository.fetchAllProducts();
+});
+
+final getProductByIdProvider =
+    FutureProvider.family<Product?, String>((ref, id) async {
+      final repository = ref.watch(productRepositoryProvider);
+      return repository.getProductById(id);
+    });

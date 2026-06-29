@@ -3,18 +3,20 @@ import 'package:intl/intl.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/product_image.dart';
-import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:seapedia_ui_compfest/features/product/application/product_provider.dart';
+import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
 
-class ProductDetailScreen extends StatefulWidget {
+class ProductDetailScreen extends ConsumerStatefulWidget {
   final String productId;
 
   const ProductDetailScreen({super.key, required this.productId});
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int _selectedThumbnail = 0;
   bool _showDescription = true;
 
@@ -27,11 +29,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final product = dummyProducts.firstWhere(
-      (p) => p.id == widget.productId,
-      orElse: () => dummyProducts.first,
-    );
     final currencyFormat = NumberFormat('#,###', 'id_ID');
+    final productAsync = ref.watch(getProductByIdProvider(widget.productId));
 
     return Scaffold(
       appBar: AppBar(
@@ -41,124 +40,141 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           IconButton(icon: const Icon(Icons.favorite_border), onPressed: () {}),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 3 / 2,
-              child: ProductImage(imageUrl: product.imageUrl),
-            ),
-            Padding(
-              padding: AppSpacing.screenPaddingHorizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  _ThumbnailRow(
-                    imageUrl: product.imageUrl,
-                    selectedIndex: _selectedThumbnail,
-                    onSelect: (index) =>
-                        setState(() => _selectedThumbnail = index),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    product.name,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
+      body: productAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => const Center(child: Text('Gagal memuat produk')),
+        data: (product) {
+          if (product == null) {
+            return const Center(child: Text('Produk tidak ditemukan'));
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 3 / 2,
+                  child: ProductImage(imageUrl: product.imageUrl),
+                ),
+                Padding(
+                  padding: AppSpacing.screenPaddingHorizontal,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Color(0xFFF5A623),
+                      const SizedBox(height: 16),
+                      _ThumbnailRow(
+                        imageUrl: product.imageUrl,
+                        selectedIndex: _selectedThumbnail,
+                        onSelect: (index) =>
+                            setState(() => _selectedThumbnail = index),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(height: 16),
                       Text(
-                        product.rating.toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimary,
+                        product.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      // Rating & ulasan di-hardcode sementara karena belum ada di model asli
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Color(0xFFF5A623),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '0.0', // rating dummy
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '(0 ulasan)', // ulasan dummy
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(width: 6),
+                          Text('·', style: Theme.of(context).textTheme.bodyMedium),
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatSoldCount(0), // terjual dummy
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _DetailTabs(
+                        showDescription: _showDescription,
+                        onTapDescription: () =>
+                            setState(() => _showDescription = true),
+                        onTapReviews: () =>
+                            setState(() => _showDescription = false),
+                      ),
+                      const SizedBox(height: 16),
+                      if (_showDescription)
+                        Text(
+                          product.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        )
+                      else
+                        Text(
+                          'Belum ada ulasan untuk produk ini.',
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(${product.reviewCount} ulasan)',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(width: 6),
-                      Text('·', style: Theme.of(context).textTheme.bodyMedium),
-                      const SizedBox(width: 6),
-                      Text(
-                        _formatSoldCount(product.soldCount),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _DetailTabs(
-                    showDescription: _showDescription,
-                    onTapDescription: () =>
-                        setState(() => _showDescription = true),
-                    onTapReviews: () =>
-                        setState(() => _showDescription = false),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_showDescription)
-                    Text(
-                      product.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    )
-                  else
-                    Text(
-                      'Belum ada ulasan untuk produk ini.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: SizedBox(
-          height: 76,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Harga',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'Rp${currencyFormat.format(product.price)}',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: AppButton(label: 'Keranjang', onPressed: () {}),
                 ),
               ],
             ),
-          ),
-        ),
+          );
+        },
+      ),
+      bottomNavigationBar: productAsync.maybeWhen(
+        data: (product) {
+          if (product == null) return const SizedBox.shrink();
+          return SafeArea(
+            child: SizedBox(
+              height: 76,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: AppColors.border)),
+                ),
+                child: Row(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Harga',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        Text(
+                          'Rp${currencyFormat.format(product.price)}',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppButton(label: 'Keranjang', onPressed: () {}),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        orElse: () => const SizedBox.shrink(),
       ),
     );
   }
 }
 
 class _ThumbnailRow extends StatelessWidget {
-  final String imageUrl;
+  final String? imageUrl;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
 

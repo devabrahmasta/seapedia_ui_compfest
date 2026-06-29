@@ -3,19 +3,21 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_search_bar.dart';
 import 'package:seapedia_ui_compfest/core/widgets/product_card.dart';
-import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:seapedia_ui_compfest/features/product/application/product_provider.dart';
+import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_filter.dart';
 
-class ProductListingScreen extends StatefulWidget {
+class ProductListingScreen extends ConsumerStatefulWidget {
   final bool autofocus;
 
   const ProductListingScreen({super.key, this.autofocus = false});
 
   @override
-  State<ProductListingScreen> createState() => _ProductListingScreenState();
+  ConsumerState<ProductListingScreen> createState() => _ProductListingScreenState();
 }
 
-class _ProductListingScreenState extends State<ProductListingScreen> {
+class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
   final _searchController = TextEditingController();
   String _query = '';
   ProductFilter _filter = const ProductFilter();
@@ -53,8 +55,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
     });
   }
 
-  List<Product> get _filteredProducts {
-    var products = dummyProducts.where((product) {
+  List<Product> _getFilteredProducts(List<Product> allProducts) {
+    var products = allProducts.where((product) {
       if (_query.isNotEmpty) {
         final keyword = _query.toLowerCase();
         final matchesQuery = product.name.toLowerCase().contains(keyword) ||
@@ -62,13 +64,19 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
         if (!matchesQuery) return false;
       }
 
+      // Filter kategori dimatikan sementara karena model Product asli belum punya field category
+      /*
       if (_filter.categories.isNotEmpty && !_filter.categories.contains(product.category)) {
         return false;
       }
+      */
 
+      // Filter rating dimatikan sementara karena model Product asli belum punya field rating
+      /*
       if (product.rating < _filter.minRating) {
         return false;
       }
+      */
 
       return true;
     }).toList();
@@ -84,7 +92,7 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = _filteredProducts;
+    final productsAsync = ref.watch(allProductsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -116,22 +124,32 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
             ),
           ),
           Expanded(
-            child: filteredProducts.isEmpty
-                ? const _EmptyState()
-                : SingleChildScrollView(
-                    padding: AppSpacing.screenPaddingHorizontal,
-                    child: MasonryGridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        return ProductCard(product: filteredProducts[index]);
-                      },
-                    ),
+            child: productsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => const Center(child: Text('Gagal memuat produk')),
+              data: (allProducts) {
+                final filteredProducts = _getFilteredProducts(allProducts);
+                
+                if (filteredProducts.isEmpty) {
+                  return const _EmptyState();
+                }
+                
+                return SingleChildScrollView(
+                  padding: AppSpacing.screenPaddingHorizontal,
+                  child: MasonryGridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      return ProductCard(product: filteredProducts[index]);
+                    },
                   ),
+                );
+              },
+            ),
           ),
           const SizedBox(height: 16),
         ],
@@ -177,6 +195,7 @@ class _FilterChipRow extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
+          /* Filter kategori dan rating disembunyikan sementara
           if (filter.minRating > 0) ...[
             _Chip(
               label: '${filter.minRating}+',
@@ -195,6 +214,7 @@ class _FilterChipRow extends StatelessWidget {
               ),
             );
           }),
+          */
         ],
       ),
     );

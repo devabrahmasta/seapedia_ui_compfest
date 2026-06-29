@@ -86,6 +86,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (activeRole == 'seller') {
+        if (path == '/select-role') return null;
+
         if (path != '/store-setup') {
           final storeState = ref.read(myStoreProvider);
           if (storeState.isLoading && !storeState.hasValue) return null;

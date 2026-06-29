@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
-import 'package:seapedia_ui_compfest/features/product/data/product_dummy.dart';
 
 enum PriceSort { none, lowToHigh, highToLow }
 
@@ -85,6 +84,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
         children: [
           Text('Filter Produk', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 20),
+          /* Filter kategori dan rating disembunyikan sementara
           Text('Kategori', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
           Wrap(
@@ -111,6 +111,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
             }).toList(),
           ),
           const SizedBox(height: 20),
+          */
           Text('Urutkan Harga', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
           Wrap(
@@ -129,6 +130,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
             ],
           ),
           const SizedBox(height: 20),
+          /*
           Text('Rating Minimal', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
           Wrap(
@@ -142,6 +144,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
               );
             }).toList(),
           ),
+          */
           const SizedBox(height: 24),
           AppButton(
             label: 'Terapkan Filter',

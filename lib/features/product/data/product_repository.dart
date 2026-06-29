@@ -8,6 +8,7 @@ class Product {
   final String description;
   final double price;
   final int stock;
+  final String storeName;
   final String? imageUrl;
   final DateTime createdAt;
 
@@ -18,6 +19,7 @@ class Product {
     required this.description,
     required this.price,
     required this.stock,
+    required this.storeName,
     this.imageUrl,
     required this.createdAt,
   });
@@ -30,6 +32,7 @@ class Product {
       description: json['description'] as String,
       price: (json['price'] as num).toDouble(),
       stock: json['stock'] as int,
+      storeName: json['stores']?['store_name'] as String? ?? 'Toko',
       imageUrl: json['image_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -44,11 +47,31 @@ class ProductRepository {
   Future<List<Product>> fetchMyProducts(String storeId) async {
     final response = await _client
         .from('products')
-        .select()
+        .select('*, stores(store_name)')
         .eq('store_id', storeId)
         .order('created_at', ascending: false);
         
     return (response as List).map((json) => Product.fromJson(json)).toList();
+  }
+
+  Future<List<Product>> fetchAllProducts() async {
+    final response = await _client
+        .from('products')
+        .select('*, stores(store_name)')
+        .order('created_at', ascending: false);
+        
+    return (response as List).map((json) => Product.fromJson(json)).toList();
+  }
+
+  Future<Product?> getProductById(String id) async {
+    final response = await _client
+        .from('products')
+        .select('*, stores(store_name)')
+        .eq('id', id)
+        .maybeSingle();
+        
+    if (response == null) return null;
+    return Product.fromJson(response);
   }
 
   Future<Product> createProduct({
@@ -66,7 +89,7 @@ class ProductRepository {
       'price': price,
       'stock': stock,
       'image_url': imageUrl,
-    }).select().single();
+    }).select('*, stores(store_name)').single();
     
     return Product.fromJson(response);
   }
@@ -85,7 +108,7 @@ class ProductRepository {
       'price': price,
       'stock': stock,
       'image_url': imageUrl,
-    }).eq('id', productId).select().single();
+    }).eq('id', productId).select('*, stores(store_name)').single();
     
     return Product.fromJson(response);
   }
