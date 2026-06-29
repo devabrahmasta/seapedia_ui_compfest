@@ -294,7 +294,7 @@ class _ReviewCarousel extends ConsumerWidget {
             padding: AppSpacing.screenPaddingHorizontal,
             scrollDirection: Axis.horizontal,
             itemCount: reviews.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final review = reviews[index];
 

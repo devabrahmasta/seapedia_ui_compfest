@@ -21,8 +21,9 @@ String mapAuthError(Object error) {
   if (error is PostgrestException) {
     if (error.code == '23505') {
       if (error.message.contains('username')) return 'Username sudah digunakan';
-      if (error.message.contains('store_name'))
+      if (error.message.contains('store_name')) {
         return 'Nama toko sudah digunakan';
+      }
       return 'Data sudah digunakan';
     }
     return 'Terjadi kesalahan, coba lagi';

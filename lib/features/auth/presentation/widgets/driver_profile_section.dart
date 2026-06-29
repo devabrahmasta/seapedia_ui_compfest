@@ -32,7 +32,7 @@ class _DriverProfileSectionState extends State<DriverProfileSection> {
                   const Spacer(),
                   Switch(
                     value: _isAvailable,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (value) => setState(() => _isAvailable = value),
                   ),
                 ],

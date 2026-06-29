@@ -4,8 +4,9 @@ import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/product_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/product/application/product_provider.dart';
-import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
+import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final String productId;
@@ -102,6 +103,62 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 24),
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final storeAsync = ref.watch(getStoreByIdProvider(product.storeId));
+                          return GestureDetector(
+                            onTap: () => context.push('/store/${product.storeId}'),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                                    child: const Icon(Icons.store, color: AppColors.primary),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        storeAsync.when(
+                                          data: (store) => Text(
+                                            store?.storeName ?? product.storeName,
+                                            style: Theme.of(context).textTheme.titleSmall,
+                                          ),
+                                          loading: () => Text(
+                                            'Memuat toko...',
+                                            style: Theme.of(context).textTheme.titleSmall,
+                                          ),
+                                          error: (_, _) => Text(
+                                            product.storeName,
+                                            style: Theme.of(context).textTheme.titleSmall,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Lihat Toko',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(height: 16),
                       _DetailTabs(

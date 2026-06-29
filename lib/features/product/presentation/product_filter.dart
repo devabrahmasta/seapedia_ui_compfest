@@ -64,6 +64,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
     _minRating = widget.initial.minRating;
   }
 
+  /* Filter kategori disembunyikan sementara
   void _toggleCategory(String category) {
     setState(() {
       if (_selectedCategories.contains(category)) {
@@ -73,6 +74,7 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
       }
     });
   }
+  */
 
   @override
   Widget build(BuildContext context) {
