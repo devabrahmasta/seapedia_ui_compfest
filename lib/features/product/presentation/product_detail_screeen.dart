@@ -184,7 +184,7 @@ class _ThumbnailRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.textPrimary
+                      ? AppColors.primary
                       : Colors.transparent,
                   width: 2,
                 ),
@@ -254,14 +254,14 @@ class _TabItem extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
+              color: isActive ? AppColors.primary : AppColors.textTertiary,
             ),
           ),
           const SizedBox(height: 6),
           Container(
             height: 2,
             width: 60,
-            color: isActive ? AppColors.textPrimary : Colors.transparent,
+            color: isActive ? AppColors.primary : Colors.transparent,
           ),
         ],
       ),

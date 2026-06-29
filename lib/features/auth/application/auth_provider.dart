@@ -22,6 +22,14 @@ final userRolesProvider = FutureProvider<List<String>>((ref) async {
   return repository.getUserRoles(session.user.id);
 });
 
+final currentUserProfileProvider = FutureProvider<UserProfile?>((ref) async {
+  final session = ref.watch(authProvider).value;
+  ref.watch(activeRoleProvider);
+  if (session == null) return null;
+  final repository = ref.watch(profileRepositoryProvider);
+  return repository.getCurrentUserProfile(session.user.id);
+});
+
 class ActiveRoleNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {

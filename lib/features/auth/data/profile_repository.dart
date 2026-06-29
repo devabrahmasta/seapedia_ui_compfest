@@ -1,5 +1,23 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+class UserProfile {
+  final String id;
+  final String username;
+  final String? fullName;
+  final String? email;
+  final String? activeRole;
+  final List<String> roles;
+
+  const UserProfile({
+    required this.id,
+    required this.username,
+    required this.fullName,
+    required this.email,
+    required this.activeRole,
+    required this.roles,
+  });
+}
+
 class ProfileRepository {
   ProfileRepository(this._client);
 
@@ -49,5 +67,25 @@ class ProfileRepository {
         .eq('id', userId)
         .maybeSingle();
     return response?['active_role'] as String?;
+  }
+
+  Future<UserProfile> getCurrentUserProfile(String userId) async {
+    final profileResponse = await _client
+        .from('profiles')
+        .select('id, username, full_name, active_role')
+        .eq('id', userId)
+        .single();
+
+    final roles = await getUserRoles(userId);
+    final email = _client.auth.currentUser?.email;
+
+    return UserProfile(
+      id: profileResponse['id'] as String,
+      username: profileResponse['username'] as String,
+      fullName: profileResponse['full_name'] as String?,
+      email: email,
+      activeRole: profileResponse['active_role'] as String?,
+      roles: roles,
+    );
   }
 }

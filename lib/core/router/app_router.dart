@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/login_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/main_screen.dart';
+import 'package:seapedia_ui_compfest/features/auth/presentation/profile_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
@@ -56,7 +57,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final path = state.matchedLocation;
       final isAuthPage = path == '/login' || path == '/register';
       final isPublicPage =
-          path == '/' || path.startsWith('/product') || path == '/write-review';
+          path == '/' ||
+          path == '/search' ||
+          path.startsWith('/product') ||
+          path == '/write-review';
 
       if (authState.isLoading && !authState.hasValue) return null;
 
@@ -80,7 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (storeState.value == null) return '/store-setup';
       }
 
-      if (isAuthPage || path == '/select-role') {
+      if (isAuthPage) {
         return '/';
       }
 
@@ -136,7 +140,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/search',
                 builder: (context, state) =>
-                    const Center(child: Text('Search Page')),
+                    const ProductListingScreen(autofocus: true),
               ),
             ],
           ),
@@ -162,8 +166,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                builder: (context, state) =>
-                    const Center(child: Text('Profile Page')),
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 
@@ -104,6 +105,7 @@ class _RoleCardState extends ConsumerState<_RoleCard> {
   Future<void> _handleTap() async {
     setState(() => _isLoading = true);
     await ref.read(activeRoleProvider.notifier).setRole(widget.option.role);
+    if (mounted) context.go('/');
   }
 
   @override
