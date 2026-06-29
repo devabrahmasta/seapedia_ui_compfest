@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+import 'package:seapedia_ui_compfest/core/theme/theme.dart';
+
+class ComingSoonPlaceholder extends StatelessWidget {
+  final String title;
+  final String message;
+
+  const ComingSoonPlaceholder({
+    required this.title,
+    this.message = 'Fitur ini akan tersedia di level berikutnya',
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(
+        child: Text(message, style: const TextStyle(color: AppColors.textSecondary)),
+      ),
+    );
+  }
+}

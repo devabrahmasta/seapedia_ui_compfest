@@ -9,13 +9,18 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/main_screen.dart
 import 'package:seapedia_ui_compfest/features/auth/presentation/profile_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
+import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_dashboard_screen.dart';
+import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_main_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
+import 'package:seapedia_ui_compfest/features/product/presentation/product_form_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_listing_screen.dart';
+import 'package:seapedia_ui_compfest/features/product/presentation/seller_product_list_screen.dart';
 import 'package:seapedia_ui_compfest/features/reviews/presentation/write_review_screen.dart';
 import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
 import 'package:seapedia_ui_compfest/features/store/presentation/store_public_screen.dart';
 import 'package:seapedia_ui_compfest/features/store/presentation/store_setup_screen.dart';
+import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -80,10 +85,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/select-role';
       }
 
-      if (activeRole == 'seller' && path != '/store-setup') {
-        final storeState = ref.read(myStoreProvider);
-        if (storeState.isLoading && !storeState.hasValue) return null;
-        if (storeState.value == null) return '/store-setup';
+      if (activeRole == 'seller') {
+        if (path != '/store-setup') {
+          final storeState = ref.read(myStoreProvider);
+          if (storeState.isLoading && !storeState.hasValue) return null;
+          if (storeState.value == null) return '/store-setup';
+        }
+        if (!path.startsWith('/seller') &&
+            path != '/store-setup' &&
+            !path.startsWith('/product') &&
+            !path.startsWith('/store/')) {
+          return '/seller/dashboard';
+        }
       }
 
       if (isAuthPage) {
@@ -123,7 +136,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/store-setup',
         builder: (context, state) => const StoreSetupScreen(),
-      ),  
+      ),
       GoRoute(
         path: '/store/:id',
         builder: (context, state) {
@@ -132,6 +145,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // Buyer mainscreen
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainScreen(navigationShell: navigationShell);
@@ -176,6 +190,70 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Seller  mainscreen
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return SellerMainScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/seller/dashboard',
+                builder: (context, state) => const SellerDashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/seller/products',
+                builder: (context, state) => const SellerProductListScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    builder: (context, state) => const ProductFormScreen(),
+                  ),
+                  GoRoute(
+                    path: ':id/edit',
+                    builder: (context, state) {
+                      final product = state.extra as Product;
+                      return ProductFormScreen(existingProduct: product);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/seller/orders',
+                builder: (context, state) =>
+                    const Center(child: Text('Pesanan')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/seller/reports',
+                builder: (context, state) =>
+                    const Center(child: Text('Laporan')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/seller/profile',
                 builder: (context, state) => const ProfileScreen(),
               ),
             ],
