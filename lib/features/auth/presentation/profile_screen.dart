@@ -49,54 +49,42 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 AppCard(
                   padding: EdgeInsets.zero,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15), 
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Column(
-                        children: [
-                          if (profile.activeRole == 'admin') ...[
-                            _MenuTile(
-                              icon: Icons.group_outlined,
-                              label: 'Kelola Pengguna',
-                            ),
-                            const Divider(height: 1, thickness: 1, color: AppColors.border),
-                            _MenuTile(
-                              icon: Icons.local_offer_outlined,
-                              label: 'Kelola Diskon',
-                            ),
-                            const Divider(height: 1, thickness: 1, color: AppColors.border),
-                          ],
-                          _MenuTile(
-                            icon: Icons.edit_outlined,
-                            label: 'Edit Profil',
-                          ),
-                          const Divider(height: 1, thickness: 1, color: AppColors.border),
-                          _MenuTile(icon: Icons.help_outline, label: 'Bantuan'),
-                          const Divider(height: 1, thickness: 1, color: AppColors.border),
-                          _MenuTile(
-                            icon: Icons.info_outline,
-                            label: 'Tentang SEAPEDIA',
-                          ),
-                        ],
+                  child: Column(
+                    children: [
+                      if (profile.activeRole == 'admin') ...[
+                        _MenuTile(
+                          icon: Icons.group_outlined,
+                          label: 'Kelola Pengguna',
+                        ),
+                        const Divider(height: 1, thickness: 1, color: AppColors.border),
+                        _MenuTile(
+                          icon: Icons.local_offer_outlined,
+                          label: 'Kelola Diskon',
+                        ),
+                        const Divider(height: 1, thickness: 1, color: AppColors.border),
+                      ],
+                      _MenuTile(
+                        icon: Icons.edit_outlined,
+                        label: 'Edit Profil',
                       ),
-                    ),
+                      const Divider(height: 1, thickness: 1, color: AppColors.border),
+                      _MenuTile(icon: Icons.help_outline, label: 'Bantuan'),
+                      const Divider(height: 1, thickness: 1, color: AppColors.border),
+                      _MenuTile(
+                        icon: Icons.info_outline,
+                        label: 'Tentang SEAPEDIA',
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 AppCard(
                   padding: EdgeInsets.zero,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: _MenuTile(
-                        icon: Icons.logout,
-                        label: 'Logout',
-                        isDanger: true,
-                        onTap: () => _confirmLogout(context, ref),
-                      ),
-                    ),
+                  child: _MenuTile(
+                    icon: Icons.logout,
+                    label: 'Logout',
+                    isDanger: true,
+                    onTap: () => _confirmLogout(context, ref),
                   ),
                 ),
                 const SizedBox(height: 16),

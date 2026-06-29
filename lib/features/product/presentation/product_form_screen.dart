@@ -75,8 +75,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         );
       } else {
         final store = await ref.read(myStoreProvider.future);
+        if (store == null) {
+          setState(
+            () => _error = 'Buat toko terlebih dahulu sebelum menambah produk',
+          );
+          setState(() => _isSubmitting = false);
+          return;
+        }
         await repository.createProduct(
-          storeId: store!.id,
+          storeId: store.id,
           name: name,
           description: description,
           price: price,
@@ -114,9 +121,16 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.camera_alt_outlined, color: AppColors.textTertiary, size: 32),
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color: AppColors.textTertiary,
+                      size: 32,
+                    ),
                     SizedBox(height: 8),
-                    Text('Tambah Foto Produk', style: TextStyle(color: AppColors.textTertiary)),
+                    Text(
+                      'Tambah Foto Produk',
+                      style: TextStyle(color: AppColors.textTertiary),
+                    ),
                   ],
                 ),
               ),

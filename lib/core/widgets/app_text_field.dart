@@ -15,7 +15,7 @@ class AppTextField extends StatefulWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.prefixIcon,
-    this.maxLines
+    this.maxLines,
   });
 
   @override
@@ -39,7 +39,7 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       obscureText: isPasswordField ? _obscured : false,
       keyboardType: widget.keyboardType,
-      maxLines: widget.maxLines,
+      maxLines: isPasswordField ? 1 : widget.maxLines,
       decoration: InputDecoration(
         labelText: widget.label,
         prefixIcon: widget.prefixIcon != null
