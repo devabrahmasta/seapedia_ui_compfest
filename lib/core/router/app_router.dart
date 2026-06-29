@@ -14,6 +14,7 @@ import 'package:seapedia_ui_compfest/features/product/presentation/product_detai
 import 'package:seapedia_ui_compfest/features/product/presentation/product_listing_screen.dart';
 import 'package:seapedia_ui_compfest/features/reviews/presentation/write_review_screen.dart';
 import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
+import 'package:seapedia_ui_compfest/features/store/presentation/store_public_screen.dart';
 import 'package:seapedia_ui_compfest/features/store/presentation/store_setup_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -60,6 +61,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           path == '/' ||
           path == '/search' ||
           path.startsWith('/product') ||
+          path.startsWith('/store') ||
           path == '/write-review';
 
       if (authState.isLoading && !authState.hasValue) return null;
@@ -121,7 +123,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/store-setup',
         builder: (context, state) => const StoreSetupScreen(),
+      ),  
+      GoRoute(
+        path: '/store/:id',
+        builder: (context, state) {
+          final storeId = state.pathParameters['id']!;
+          return StorePublicScreen(storeId: storeId);
+        },
       ),
+
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainScreen(navigationShell: navigationShell);

@@ -10,7 +10,13 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 final myProductsProvider = FutureProvider<List<Product>>((ref) async {
   final store = await ref.watch(myStoreProvider.future);
   if (store == null) return [];
-  
+
   final repository = ref.watch(productRepositoryProvider);
   return repository.fetchMyProducts(store.id);
 });
+
+final getProductsByStoreIdProvider =
+    FutureProvider.family<List<Product>, String>((ref, storeId) async {
+      final repository = ref.watch(productRepositoryProvider);
+      return repository.fetchMyProducts(storeId);
+    });

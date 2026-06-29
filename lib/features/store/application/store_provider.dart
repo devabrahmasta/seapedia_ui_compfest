@@ -14,3 +14,11 @@ final myStoreProvider = FutureProvider<Store?>((ref) async {
   final repository = ref.watch(storeRepositoryProvider);
   return repository.getStoreBySellerId(session.user.id);
 });
+
+final getStoreByIdProvider = FutureProvider.family<Store?, String>((
+  ref,
+  storeId,
+) async {
+  final repository = ref.watch(storeRepositoryProvider);
+  return repository.getStoreById(storeId);
+});

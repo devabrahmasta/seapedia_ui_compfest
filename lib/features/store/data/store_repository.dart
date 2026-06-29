@@ -64,13 +64,19 @@ class StoreRepository {
   }) async {
     final response = await _client
         .from('stores')
-        .update({
-          'store_name': storeName,
-          'description': description,
-        })
+        .update({'store_name': storeName, 'description': description})
         .eq('id', storeId)
         .select()
         .single();
     return Store.fromJson(response);
+  }
+
+  Future<Store?> getStoreById(String id) async {
+    final response = await _client
+        .from('stores')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    return response == null ? null : Store.fromJson(response);
   }
 }
