@@ -355,7 +355,7 @@ class _CheckoutBar extends StatelessWidget {
         ),
         child: AppButton(
           label: 'Checkout · ${formatter.format(subtotal)}',
-          onPressed: () {},
+          onPressed: () => context.push('/checkout'),
         ),
       ),
     );
