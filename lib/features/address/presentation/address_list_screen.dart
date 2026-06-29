@@ -29,7 +29,7 @@ class AddressListScreen extends ConsumerWidget {
               const EdgeInsets.symmetric(vertical: 24),
             ),
             itemCount: addresses.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               final address = addresses[index];
               return _AddressCard(address: address);
