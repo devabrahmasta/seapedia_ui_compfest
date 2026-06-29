@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Product {
@@ -91,5 +92,14 @@ class ProductRepository {
 
   Future<void> deleteProduct(String productId) async {
     await _client.from('products').delete().eq('id', productId);
+  }
+
+  Future<String> uploadProductImage(String storeId, File file) async {
+    final fileExt = file.path.split('.').last;
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}_$storeId.$fileExt';
+    final filePath = '$storeId/$fileName';
+    
+    await _client.storage.from('products').upload(filePath, file);
+    return _client.storage.from('products').getPublicUrl(filePath);
   }
 }

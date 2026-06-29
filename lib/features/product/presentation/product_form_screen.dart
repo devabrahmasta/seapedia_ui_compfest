@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
@@ -31,8 +34,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     text: widget.existingProduct?.stock.toString() ?? '',
   );
 
+  XFile? _selectedImage;
   bool _isSubmitting = false;
   String? _error;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = pickedFile;
+      });
+    }
+  }
 
   bool get _isEditing => widget.existingProduct != null;
 
@@ -63,15 +77,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
     try {
       final repository = ref.read(productRepositoryProvider);
+      String? imageUrl = widget.existingProduct?.imageUrl;
 
       if (_isEditing) {
+        if (_selectedImage != null) {
+          imageUrl = await repository.uploadProductImage(
+            widget.existingProduct!.storeId,
+            File(_selectedImage!.path),
+          );
+        }
         await repository.updateProduct(
           productId: widget.existingProduct!.id,
           name: name,
           description: description,
           price: price,
           stock: stock,
-          imageUrl: widget.existingProduct!.imageUrl,
+          imageUrl: imageUrl,
         );
       } else {
         final store = await ref.read(myStoreProvider.future);
@@ -82,12 +103,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           setState(() => _isSubmitting = false);
           return;
         }
+        if (_selectedImage != null) {
+          imageUrl = await repository.uploadProductImage(
+            store.id,
+            File(_selectedImage!.path),
+          );
+        }
         await repository.createProduct(
           storeId: store.id,
           name: name,
           description: description,
           price: price,
           stock: stock,
+          imageUrl: imageUrl,
         );
       }
 
@@ -111,27 +139,47 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
-              Container(
-                height: 140,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      color: AppColors.textTertiary,
-                      size: 32,
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Tambah Foto Produk',
-                      style: TextStyle(color: AppColors.textTertiary),
-                    ),
-                  ],
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                    image: _selectedImage != null
+                        ? DecorationImage(
+                            image: FileImage(File(_selectedImage!.path)),
+                            fit: BoxFit.cover,
+                          )
+                        : (widget.existingProduct?.imageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(
+                                    widget.existingProduct!.imageUrl!,
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : null),
+                  ),
+                  child:
+                      _selectedImage == null &&
+                          widget.existingProduct?.imageUrl == null
+                      ? const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_outlined,
+                              color: AppColors.textTertiary,
+                              size: 32,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Tambah Foto Produk',
+                              style: TextStyle(color: AppColors.textTertiary),
+                            ),
+                          ],
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 20),
