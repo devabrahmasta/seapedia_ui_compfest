@@ -10,6 +10,7 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/profile_screen.d
 import 'package:seapedia_ui_compfest/features/auth/presentation/register_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_dashboard_screen.dart';
+import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_report_screen.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_main_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
@@ -27,7 +28,7 @@ import 'package:seapedia_ui_compfest/features/product/data/product_repository.da
 import 'package:seapedia_ui_compfest/features/cart/presentation/cart_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/checkout_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/my_orders_screen.dart';
-import 'package:seapedia_ui_compfest/features/order/presentation/incoming_orders_screen.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/order_history_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/order_detail_screen.dart';
 import 'package:seapedia_ui_compfest/features/promo/data/promo_repository.dart';
 import 'package:seapedia_ui_compfest/features/promo/presentation/promo_selection_screen.dart';
@@ -291,7 +292,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/seller/orders',
-                builder: (context, state) => const IncomingOrdersScreen(),
+                builder: (context, state) => const OrderHistoryScreen(),
               ),
             ],
           ),
@@ -299,8 +300,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/seller/reports',
-                builder: (context, state) =>
-                    const Center(child: Text('Laporan')),
+                builder: (context, state) => const SellerReportScreen(),
               ),
             ],
           ),

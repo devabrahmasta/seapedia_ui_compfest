@@ -50,7 +50,6 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
     if (_selectedPreset != null) {
       amount = _selectedPreset!;
     } else if (_customAmountController.text.isNotEmpty) {
-      // Remove any non-numeric characters before parsing if needed, but keyboard is number.
       amount = double.tryParse(_customAmountController.text) ?? 0;
     }
 
@@ -71,7 +70,6 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
         currentBalance: widget.wallet.balance,
       );
 
-      // Invalidate providers to refresh data
       ref.invalidate(myWalletProvider);
       ref.invalidate(walletTransactionsProvider);
 
@@ -97,7 +95,6 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // Padding for keyboard
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 20,
@@ -132,7 +129,7 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
               return GestureDetector(
                 onTap: () => _onPresetSelected(nominal),
                 child: Container(
-                  width: (MediaQuery.of(context).size.width - 40 - 12) / 2, // 2 columns
+                  width: (MediaQuery.of(context).size.width - 40 - 12) / 2,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : AppColors.surface,

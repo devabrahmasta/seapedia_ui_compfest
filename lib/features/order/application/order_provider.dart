@@ -24,3 +24,7 @@ final incomingOrdersProvider = FutureProvider<List<OrderSummary>>((ref) async {
   if (store == null) return [];
   return ref.read(orderRepositoryProvider).getIncomingOrders(store.id);
 });
+
+final storeIncomeProvider = FutureProvider.family<StoreIncomeSummary, String>((ref, storeId) async {
+  return ref.read(orderRepositoryProvider).getStoreIncomeSummary(storeId);
+});

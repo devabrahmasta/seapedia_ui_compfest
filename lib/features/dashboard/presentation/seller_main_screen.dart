@@ -26,9 +26,9 @@ class SellerMainScreen extends StatelessWidget {
             label: 'Produk',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: 'Pesanan',
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_outlined),

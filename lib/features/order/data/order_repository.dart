@@ -199,22 +199,29 @@ class OrderDetail {
   }
 }
 
+class StoreIncomeSummary {
+  final double totalIncome;
+  final int completedOrderCount;
+  final double averagePerOrder;
+
+  const StoreIncomeSummary({
+    required this.totalIncome,
+    required this.completedOrderCount,
+    required this.averagePerOrder,
+  });
+}
+
 class OrderRepository {
   OrderRepository(this._client);
 
   final SupabaseClient _client;
 
-  // Biaya pengiriman per metode (keputusan bisnis — lihat README)
   static const deliveryFees = {
     'instant': 25000.0,
     'next_day': 15000.0,
     'regular': 9000.0,
   };
 
-  // Checkout dilakukan di Flutter repository level (bukan Postgres Function)
-  // karena pola ini konsisten dengan codebase yang ada (lihat WalletRepository).
-  // Validasi stok dan saldo dilakukan SEBELUM semua mutasi sehingga
-  // kegagalan validasi tidak meninggalkan data parsial di database.
   Future<Order> checkout({
     required String buyerId,
     required String cartId,
@@ -227,7 +234,6 @@ class OrderRepository {
     String? promoId,
     double discountAmount = 0,
   }) async {
-    // 1. Fetch cart items beserta data produk terkini
     final rawItems = await _client
         .from('cart_items')
         .select('quantity, products(id, name, price, stock)')
@@ -236,7 +242,6 @@ class OrderRepository {
     final items = rawItems as List;
     if (items.isEmpty) throw Exception('Keranjang kosong');
 
-    // 2. Validasi stok semua item SEBELUM mutasi apapun
     for (final item in items) {
       final product = item['products'] as Map<String, dynamic>;
       final stock = product['stock'] as int;
@@ -249,7 +254,6 @@ class OrderRepository {
       }
     }
 
-    // 3. Hitung harga
     double subtotal = 0;
     for (final item in items) {
       subtotal +=
@@ -261,7 +265,6 @@ class OrderRepository {
     final ppn = (subtotal - cappedDiscount) * 0.12;
     final total = subtotal - cappedDiscount + deliveryFee + ppn;
 
-    // 4. Validasi saldo wallet SEBELUM mutasi apapun
     if (walletBalance < total) {
       throw InsufficientBalanceException(
         balance: walletBalance,
@@ -269,7 +272,6 @@ class OrderRepository {
       );
     }
 
-    // 5. Insert order
     final orderData = await _client
         .from('orders')
         .insert({
@@ -291,7 +293,6 @@ class OrderRepository {
 
     final orderId = orderData['id'] as String;
 
-    // 6. Insert order_items (snapshot nama dan harga)
     await _client
         .from('order_items')
         .insert(
@@ -309,14 +310,12 @@ class OrderRepository {
               .toList(),
         );
 
-    // 7. Insert order_status_history
     await _client.from('order_status_history').insert({
       'order_id': orderId,
       'status': 'Sedang Dikemas',
       'changed_at': DateTime.now().toIso8601String(),
     });
 
-    // 8. Kurangi stok tiap produk
     for (final item in items) {
       final productId = item['products']['id'] as String;
       final currentStock = item['products']['stock'] as int;
@@ -326,7 +325,6 @@ class OrderRepository {
           .eq('id', productId);
     }
 
-    // 9. Potong saldo wallet + catat transaksi
     await _client
         .from('wallets')
         .update({'balance': walletBalance - total})
@@ -339,12 +337,9 @@ class OrderRepository {
       'reference_id': orderId,
     });
 
-    // 10. Kosongkan cart
     await _client.from('cart_items').delete().eq('cart_id', cartId);
     await _client.from('carts').update({'store_id': null}).eq('id', cartId);
 
-    // 11. Voucher (bukan promo) bersifat sekali pakai per limit, jadi usage_count
-    // ditambah setelah checkout benar-benar berhasil
     if (voucherId != null) {
       final voucher = await _client
           .from('vouchers')
@@ -405,5 +400,35 @@ class OrderRepository {
       'changed_at': DateTime.now().toIso8601String(),
     });
     await _client.from('orders').update({'status': newStatus}).eq('id', orderId);
+  }
+
+  Future<StoreIncomeSummary> getStoreIncomeSummary(String storeId) async {
+    // Definisi Pendapatan:
+    // Hitung dari order dengan status 'Pesanan Selesai' saja.
+    // Menggunakan orders.subtotal (bukan total, karena total termasuk ongkir dan PPN 
+    // yang bukan pendapatan murni seller - ongkir untuk kurir, PPN untuk pajak).
+    final data = await _client
+        .from('orders')
+        .select('subtotal')
+        .eq('store_id', storeId)
+        .eq('status', 'Pesanan Selesai');
+
+    final orders = data as List;
+    double totalIncome = 0;
+    int completedOrderCount = orders.length;
+
+    for (final order in orders) {
+      totalIncome += (order['subtotal'] as num).toDouble();
+    }
+
+    double averagePerOrder = completedOrderCount > 0 
+        ? totalIncome / completedOrderCount 
+        : 0;
+
+    return StoreIncomeSummary(
+      totalIncome: totalIncome,
+      completedOrderCount: completedOrderCount,
+      averagePerOrder: averagePerOrder,
+    );
   }
 }

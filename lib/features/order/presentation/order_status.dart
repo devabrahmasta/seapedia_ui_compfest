@@ -11,6 +11,6 @@ IconData orderStatusIcon(String status) {
     case 'Dikembalikan':
       return Icons.assignment_return_outlined;
     default:
-      return Icons.inventory_2_outlined; // Sedang Dikemas
+      return Icons.inventory_2_outlined;
   }
 }
