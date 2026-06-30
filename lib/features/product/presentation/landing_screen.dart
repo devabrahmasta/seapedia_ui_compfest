@@ -37,7 +37,7 @@ class LandingScreen extends StatelessWidget {
                   Icons.shopping_cart_outlined,
                   color: AppColors.textPrimary,
                 ),
-                onPressed: () {},
+                onPressed: () => context.go('/cart'),
               ),
               Positioned(
                 right: 6,
@@ -152,14 +152,7 @@ class _PromoBanner extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Center(
-        child: Text(
-          'banner promo',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textTertiary),
-        ),
-      ),
+      child: Center(child: Icon(Icons.image_not_supported_outlined)),
     );
   }
 }
@@ -181,29 +174,38 @@ class _CategoryList extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: categories.map((cat) {
-          return Column(
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
+          return GestureDetector(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Fitur ${cat['label']} akan segera hadir!"),
                 ),
-                child: Icon(
-                  cat['icon'] as IconData,
-                  color: AppColors.textSecondary,
-                  size: 28,
+              );
+            },
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    cat['icon'] as IconData,
+                    color: AppColors.textSecondary,
+                    size: 28,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                cat['label'] as String,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                const SizedBox(height: 8),
+                Text(
+                  cat['label'] as String,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }).toList(),
       ),

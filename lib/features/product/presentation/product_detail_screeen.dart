@@ -22,7 +22,6 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  int _selectedThumbnail = 0;
   bool _showDescription = true;
 
   String _formatSoldCount(int count) {
@@ -68,19 +67,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-                      _ThumbnailRow(
-                        imageUrl: product.imageUrl,
-                        selectedIndex: _selectedThumbnail,
-                        onSelect: (index) =>
-                            setState(() => _selectedThumbnail = index),
-                      ),
-                      const SizedBox(height: 16),
                       Text(
                         product.name,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
-                      // Rating & ulasan di-hardcode sementara karena belum ada di model asli
                       Row(
                         children: [
                           const Icon(
@@ -90,13 +81,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '0.0', // rating dummy
+                            '0.0',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textPrimary),
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '(0 ulasan)', // ulasan dummy
+                            '(0 ulasan)',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(width: 6),
@@ -106,7 +97,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            _formatSoldCount(0), // terjual dummy
+                            _formatSoldCount(0),
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -268,7 +259,9 @@ class _ProductCartAction extends ConsumerWidget {
       return;
     }
     try {
-      await ref.read(cartProvider.notifier).addItem(
+      await ref
+          .read(cartProvider.notifier)
+          .addItem(
             productId: product.id,
             storeId: product.storeId,
             storeName: product.storeName,
@@ -276,7 +269,9 @@ class _ProductCartAction extends ConsumerWidget {
       if (context.mounted) context.push('/cart');
     } on CartDifferentStoreException catch (_) {
       try {
-        await ref.read(cartProvider.notifier).clearAndAddItem(
+        await ref
+            .read(cartProvider.notifier)
+            .clearAndAddItem(
               productId: product.id,
               storeId: product.storeId,
               storeName: product.storeName,
@@ -418,7 +413,10 @@ class _ProductCartAction extends ConsumerWidget {
               shape: const StadiumBorder(),
               side: const BorderSide(color: AppColors.primary),
             ),
-            child: const Text('Beli Sekarang', style: TextStyle(color: AppColors.primary)),
+            child: const Text(
+              'Beli Sekarang',
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -509,48 +507,6 @@ class _CartIconButton extends ConsumerWidget {
         child: const Icon(Icons.shopping_cart_outlined),
       ),
       onPressed: () => context.go('/cart'),
-    );
-  }
-}
-
-class _ThumbnailRow extends StatelessWidget {
-  final String? imageUrl;
-  final int selectedIndex;
-  final ValueChanged<int> onSelect;
-
-  const _ThumbnailRow({
-    required this.imageUrl,
-    required this.selectedIndex,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(3, (index) {
-        final isSelected = index == selectedIndex;
-        return Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: GestureDetector(
-            onTap: () => onSelect(index),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  width: 2,
-                ),
-              ),
-              child: ProductImage(
-                imageUrl: imageUrl,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-        );
-      }),
     );
   }
 }
