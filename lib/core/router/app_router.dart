@@ -12,6 +12,9 @@ import 'package:seapedia_ui_compfest/features/auth/presentation/role_selection.d
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_dashboard_screen.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_report_screen.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_main_screen.dart';
+import 'package:seapedia_ui_compfest/features/dashboard/presentation/driver_main_screen.dart';
+import 'package:seapedia_ui_compfest/features/delivery/presentation/job_detail_screen.dart';
+import 'package:seapedia_ui_compfest/features/delivery/presentation/job_search_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_form_screen.dart';
@@ -28,7 +31,7 @@ import 'package:seapedia_ui_compfest/features/product/data/product_repository.da
 import 'package:seapedia_ui_compfest/features/cart/presentation/cart_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/checkout_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/my_orders_screen.dart';
-import 'package:seapedia_ui_compfest/features/order/presentation/order_history_screen.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/incoming_orders_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/order_detail_screen.dart';
 import 'package:seapedia_ui_compfest/features/promo/data/promo_repository.dart';
 import 'package:seapedia_ui_compfest/features/promo/presentation/promo_selection_screen.dart';
@@ -111,6 +114,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             !path.startsWith('/store/') &&
             !path.startsWith('/order/')) {
           return '/seller/dashboard';
+        }
+      }
+
+      if (activeRole == 'driver') {
+        if (path == '/select-role') return null;
+        if (!path.startsWith('/driver') &&
+            !path.startsWith('/order/') &&
+            !path.startsWith('/product')) {
+          return '/driver/jobs';
         }
       }
 
@@ -292,7 +304,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/seller/orders',
-                builder: (context, state) => const OrderHistoryScreen(),
+                builder: (context, state) => const IncomingOrdersScreen(),
               ),
             ],
           ),
@@ -308,6 +320,58 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/seller/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Driver mainscreen
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return DriverMainScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/driver/jobs',
+                builder: (context, state) => const JobSearchScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return JobDetailScreen(jobId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/driver/history',
+                builder: (context, state) =>
+                    const Center(child: Text('Riwayat Job')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/driver/earnings',
+                builder: (context, state) =>
+                    const Center(child: Text('Pendapatan')),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/driver/profile',
                 builder: (context, state) => const ProfileScreen(),
               ),
             ],

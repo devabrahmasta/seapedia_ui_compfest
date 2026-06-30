@@ -400,13 +400,15 @@ class OrderRepository {
       'changed_at': DateTime.now().toIso8601String(),
     });
     await _client.from('orders').update({'status': newStatus}).eq('id', orderId);
+    if (newStatus == 'Menunggu Pengirim') {
+      await _client.from('delivery_jobs').insert({
+        'order_id': orderId,
+        'status': 'available',
+      });
+    }
   }
 
   Future<StoreIncomeSummary> getStoreIncomeSummary(String storeId) async {
-    // Definisi Pendapatan:
-    // Hitung dari order dengan status 'Pesanan Selesai' saja.
-    // Menggunakan orders.subtotal (bukan total, karena total termasuk ongkir dan PPN 
-    // yang bukan pendapatan murni seller - ongkir untuk kurir, PPN untuk pajak).
     final data = await _client
         .from('orders')
         .select('subtotal')

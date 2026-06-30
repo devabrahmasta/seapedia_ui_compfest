@@ -38,8 +38,8 @@ class SellerReportScreen extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              ref.refresh(storeIncomeProvider(store.id));
-              ref.refresh(incomingOrdersProvider);
+              ref.invalidate(storeIncomeProvider(store.id));
+              ref.invalidate(incomingOrdersProvider);
             },
             child: ListView(
               padding: AppSpacing.screenPaddingHorizontal,
@@ -182,7 +182,7 @@ class SellerReportScreen extends ConsumerWidget {
                 ordersAsync.when(
                   data: (orders) {
                     final completed = orders
-                        .where((o) => o.status == 'Selesai')
+                        .where((o) => o.status == 'Pesanan Selesai')
                         .toList();
                     if (completed.isEmpty) {
                       return const Padding(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class SellerMainScreen extends StatelessWidget {
+class DriverMainScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const SellerMainScreen({super.key, required this.navigationShell});
+  const DriverMainScreen({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +16,18 @@ class SellerMainScreen extends StatelessWidget {
         onTap: (index) => navigationShell.goBranch(index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            icon: Icon(Icons.explore_outlined),
+            activeIcon: Icon(Icons.explore),
+            label: 'Cari Job',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2_outlined),
-            activeIcon: Icon(Icons.inventory_2),
-            label: 'Produk',
+            icon: Icon(Icons.history),
+            label: 'Riwayat',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: 'Pesanan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Laporan',
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            activeIcon: Icon(Icons.account_balance_wallet),
+            label: 'Pendapatan',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
