@@ -13,6 +13,7 @@ import 'package:seapedia_ui_compfest/features/cart/application/cart_provider.dar
 import 'package:seapedia_ui_compfest/features/cart/data/cart_repository.dart';
 import 'package:seapedia_ui_compfest/features/order/application/order_provider.dart';
 import 'package:seapedia_ui_compfest/features/order/data/order_repository.dart';
+import 'package:seapedia_ui_compfest/features/promo/data/promo_repository.dart';
 import 'package:seapedia_ui_compfest/features/wallet/application/wallet_provider.dart';
 import 'package:seapedia_ui_compfest/features/wallet/data/wallet_repository.dart';
 
@@ -32,6 +33,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   String _deliveryMethod = 'instant';
   Address? _selectedAddress;
+  PromoCode? _selectedPromo;
   bool _isLoading = false;
 
   double get _deliveryFee => OrderRepository.deliveryFees[_deliveryMethod]!;
@@ -43,18 +45,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(myAddressesProvider, (_, next) {
-      next.whenData((list) {
-        if (_selectedAddress == null && list.isNotEmpty && mounted) {
-          setState(
-            () => _selectedAddress = list.firstWhere(
-              (a) => a.isDefault,
-              orElse: () => list.first,
-            ),
-          );
-        }
-      });
-    });
+    final addresses = ref.watch(myAddressesProvider).value ?? [];
+    final effectiveAddress = _selectedAddress ?? (addresses.isNotEmpty ? addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first) : null);
 
     final cartAsync = ref.watch(cartProvider);
     final walletAsync = ref.watch(myWalletProvider);
@@ -74,8 +66,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             return const Center(child: Text('Keranjang kosong'));
 
           final subtotal = cart.subtotal;
-          final ppn = subtotal * 0.12;
-          final total = subtotal + _deliveryFee + ppn;
+          final discountAmount =
+              _selectedPromo?.calculateDiscount(subtotal) ?? 0.0;
+          final ppn = (subtotal - discountAmount) * 0.12;
+          final total = subtotal - discountAmount + _deliveryFee + ppn;
 
           return Column(
             children: [
@@ -88,7 +82,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     _Section(
                       title: 'Alamat pengiriman',
                       child: _AddressCard(
-                        address: _selectedAddress,
+                        address: effectiveAddress,
                         onTap: () => _showAddressPicker(context),
                       ),
                     ),
@@ -128,6 +122,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                     const SizedBox(height: 16),
                     _Section(
+                      title: 'Kode promo',
+                      child: _PromoCard(
+                        promo: _selectedPromo,
+                        discountAmount: discountAmount,
+                        fmt: _fmt,
+                        onTap: () => _openPromoSelection(subtotal),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _Section(
                       title: 'Rincian pembelian',
                       child: AppCard(
                         child: Column(
@@ -136,6 +140,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               label: 'Subtotal produk',
                               value: _fmt.format(subtotal),
                             ),
+                            if (discountAmount > 0) ...[
+                              const SizedBox(height: 10),
+                              _PriceRow(
+                                label: 'Diskon',
+                                value: '-${_fmt.format(discountAmount)}',
+                                valueColor: AppColors.primary,
+                              ),
+                            ],
                             const SizedBox(height: 10),
                             _PriceRow(
                               label: 'Biaya pengiriman',
@@ -179,7 +191,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 total: total,
                 fmt: _fmt,
                 isLoading: _isLoading,
-                onPay: () => _handleCheckout(cart, total, walletAsync.value),
+                onPay: () => _handleCheckout(
+                  cart,
+                  total,
+                  discountAmount,
+                  walletAsync.value,
+                  effectiveAddress,
+                ),
                 walletAsync: walletAsync,
               ),
             ],
@@ -232,12 +250,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
+  Future<void> _openPromoSelection(double subtotal) async {
+    final result = await context.push<PromoCode>(
+      '/promo-selection',
+      extra: {'subtotal': subtotal, 'selectedPromo': _selectedPromo},
+    );
+    if (!mounted) return;
+    setState(() => _selectedPromo = result);
+  }
+
   Future<void> _handleCheckout(
     CartState cart,
     double total,
+    double discountAmount,
     Wallet? wallet,
+    Address? effectiveAddress,
   ) async {
-    if (_selectedAddress == null) {
+    if (effectiveAddress == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pilih alamat pengiriman terlebih dahulu'),
@@ -255,25 +284,36 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     setState(() => _isLoading = true);
     try {
       final session = ref.read(authProvider).value!;
-      await ref
+      final newOrder = await ref
           .read(orderRepositoryProvider)
           .checkout(
             buyerId: session.user.id,
             cartId: cart.cart!.id,
             storeId: cart.cart!.storeId!,
-            addressId: _selectedAddress!.id,
+            addressId: effectiveAddress.id,
             deliveryMethod: _deliveryMethod,
             walletId: wallet.id,
             walletBalance: wallet.balance,
+            voucherId: _selectedPromo?.source == PromoSource.voucher
+                ? _selectedPromo!.id
+                : null,
+            promoId: _selectedPromo?.source == PromoSource.promo
+                ? _selectedPromo!.id
+                : null,
+            discountAmount: discountAmount,
           );
+
       ref.invalidate(cartProvider);
       ref.invalidate(myWalletProvider);
       ref.invalidate(walletTransactionsProvider);
+      ref.invalidate(myOrdersProvider);
+
       if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Pesanan berhasil dibuat!')));
-      context.go('/');
+      context.pushReplacement('/order/${newOrder.id}');
     } on InsufficientBalanceException catch (e) {
       if (!mounted) return;
       _showInsufficientBalanceDialog(e);
@@ -534,8 +574,9 @@ class _ProductRow extends StatelessWidget {
 class _PriceRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
 
-  const _PriceRow({required this.label, required this.value});
+  const _PriceRow({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -545,11 +586,74 @@ class _PriceRow extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         Text(
           value,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: valueColor ?? AppColors.textPrimary,
+          ),
         ),
       ],
+    );
+  }
+}
+
+// ── Promo ─────────────────────────────────────────────────────────────────────
+
+class _PromoCard extends StatelessWidget {
+  final PromoCode? promo;
+  final double discountAmount;
+  final NumberFormat fmt;
+  final VoidCallback onTap;
+
+  const _PromoCard({
+    required this.promo,
+    required this.discountAmount,
+    required this.fmt,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          const Icon(
+            Icons.confirmation_number_outlined,
+            size: 20,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: promo == null
+                ? Text(
+                    'Kode Promo',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${promo!.code} dipakai',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontSize: 14,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Hemat ${fmt.format(discountAmount)}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: AppColors.textTertiary,
+          ),
+        ],
+      ),
     );
   }
 }

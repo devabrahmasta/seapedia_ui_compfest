@@ -29,6 +29,8 @@ import 'package:seapedia_ui_compfest/features/order/presentation/checkout_screen
 import 'package:seapedia_ui_compfest/features/order/presentation/my_orders_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/incoming_orders_screen.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/order_detail_screen.dart';
+import 'package:seapedia_ui_compfest/features/promo/data/promo_repository.dart';
+import 'package:seapedia_ui_compfest/features/promo/presentation/promo_selection_screen.dart';
 import 'package:seapedia_ui_compfest/features/wallet/presentation/wallet_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -170,6 +172,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return OrderDetailScreen(orderId: id);
+        },
+      ),
+      GoRoute(
+        path: '/promo-selection',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PromoSelectionScreen(
+            subtotal: extra['subtotal'] as double,
+            selectedPromo: extra['selectedPromo'] as PromoCode?,
+          );
         },
       ),
       GoRoute(

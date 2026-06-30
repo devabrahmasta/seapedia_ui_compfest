@@ -31,6 +31,8 @@ class Order {
   final double total;
   final String status;
   final DateTime createdAt;
+  final String? voucherId;
+  final String? promoId;
 
   const Order({
     required this.id,
@@ -45,6 +47,8 @@ class Order {
     required this.total,
     required this.status,
     required this.createdAt,
+    this.voucherId,
+    this.promoId,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -60,6 +64,8 @@ class Order {
     total: (json['total'] as num).toDouble(),
     status: json['status'] as String,
     createdAt: DateTime.parse(json['created_at'] as String),
+    voucherId: json['voucher_id'] as String?,
+    promoId: json['promo_id'] as String?,
   );
 }
 
@@ -217,6 +223,9 @@ class OrderRepository {
     required String deliveryMethod,
     required String walletId,
     required double walletBalance,
+    String? voucherId,
+    String? promoId,
+    double discountAmount = 0,
   }) async {
     // 1. Fetch cart items beserta data produk terkini
     final rawItems = await _client
@@ -248,8 +257,9 @@ class OrderRepository {
           (item['quantity'] as int);
     }
     final deliveryFee = deliveryFees[deliveryMethod]!;
-    final ppn = subtotal * 0.12;
-    final total = subtotal + deliveryFee + ppn;
+    final cappedDiscount = discountAmount.clamp(0, subtotal).toDouble();
+    final ppn = (subtotal - cappedDiscount) * 0.12;
+    final total = subtotal - cappedDiscount + deliveryFee + ppn;
 
     // 4. Validasi saldo wallet SEBELUM mutasi apapun
     if (walletBalance < total) {
@@ -268,11 +278,13 @@ class OrderRepository {
           'address_id': addressId,
           'delivery_method': deliveryMethod,
           'subtotal': subtotal,
-          'discount_amount': 0,
+          'discount_amount': cappedDiscount,
           'delivery_fee': deliveryFee,
           'ppn': ppn,
           'total': total,
           'status': 'Sedang Dikemas',
+          'voucher_id': voucherId,
+          'promo_id': promoId,
         })
         .select()
         .single();
@@ -330,6 +342,21 @@ class OrderRepository {
     // 10. Kosongkan cart
     await _client.from('cart_items').delete().eq('cart_id', cartId);
     await _client.from('carts').update({'store_id': null}).eq('id', cartId);
+
+    // 11. Voucher (bukan promo) bersifat sekali pakai per limit, jadi usage_count
+    // ditambah setelah checkout benar-benar berhasil
+    if (voucherId != null) {
+      final voucher = await _client
+          .from('vouchers')
+          .select('usage_count')
+          .eq('id', voucherId)
+          .single();
+      final currentUsage = voucher['usage_count'] as int;
+      await _client
+          .from('vouchers')
+          .update({'usage_count': currentUsage + 1})
+          .eq('id', voucherId);
+    }
 
     return Order.fromJson(orderData);
   }

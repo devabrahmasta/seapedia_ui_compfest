@@ -110,6 +110,14 @@ class _DetailBody extends StatelessWidget {
                   label: 'Subtotal',
                   value: priceFmt.format(order.subtotal),
                 ),
+                if (order.discountAmount > 0) ...[
+                  const SizedBox(height: 10),
+                  _PriceRow(
+                    label: 'Diskon',
+                    value: '-${priceFmt.format(order.discountAmount)}',
+                    valueColor: AppColors.primary,
+                  ),
+                ],
                 const SizedBox(height: 10),
                 _PriceRow(
                   label: 'Pengiriman',
@@ -400,8 +408,13 @@ class _ProductRow extends StatelessWidget {
 class _PriceRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
 
-  const _PriceRow({required this.label, required this.value});
+  const _PriceRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -411,9 +424,9 @@ class _PriceRow extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         Text(
           value,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: valueColor ?? AppColors.textPrimary,
+          ),
         ),
       ],
     );
