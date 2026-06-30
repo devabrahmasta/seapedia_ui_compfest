@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_card.dart';
+import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/order/application/order_provider.dart';
 import 'package:seapedia_ui_compfest/features/order/data/order_repository.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/order_status.dart';
@@ -27,6 +28,7 @@ class OrderDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(orderDetailProvider(orderId));
+    final activeRole = ref.watch(activeRoleProvider).value;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Pesanan'), centerTitle: true),
@@ -38,6 +40,7 @@ class OrderDetailScreen extends ConsumerWidget {
           timeFmt: _timeFmt,
           priceFmt: _priceFmt,
           compact: _compact,
+          isSeller: activeRole == 'seller',
         ),
       ),
     );
@@ -49,12 +52,14 @@ class _DetailBody extends StatelessWidget {
   final DateFormat timeFmt;
   final NumberFormat priceFmt;
   final String Function(double) compact;
+  final bool isSeller;
 
   const _DetailBody({
     required this.detail,
     required this.timeFmt,
     required this.priceFmt,
     required this.compact,
+    required this.isSeller,
   });
 
   @override
@@ -69,7 +74,10 @@ class _DetailBody extends StatelessWidget {
         const SizedBox(height: 24),
         _Section(
           title: 'Status Pesanan',
-          child: _StatusTimeline(history: detail.statusHistory, timeFmt: timeFmt),
+          child: _StatusTimeline(
+            history: detail.statusHistory,
+            timeFmt: timeFmt,
+          ),
         ),
         const SizedBox(height: 20),
         _Section(
@@ -95,23 +103,32 @@ class _DetailBody extends StatelessWidget {
           child: AppCard(
             child: Column(
               children: [
-                _PriceRow(label: 'Subtotal', value: priceFmt.format(order.subtotal)),
-                const SizedBox(height: 10),
-                _PriceRow(label: 'Pengiriman', value: priceFmt.format(order.deliveryFee)),
-                const SizedBox(height: 10),
-                _PriceRow(label: 'PPN (12%)', value: priceFmt.format(order.ppn)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(color: AppColors.border, height: 1),
+                _PriceRow(
+                  label: 'Subtotal',
+                  value: priceFmt.format(order.subtotal),
                 ),
+                const SizedBox(height: 10),
+                _PriceRow(
+                  label: 'Pengiriman',
+                  value: priceFmt.format(order.deliveryFee),
+                ),
+                const SizedBox(height: 10),
+                _PriceRow(label: 'PPN', value: priceFmt.format(order.ppn)),
+                const SizedBox(height: 10),
+                const Divider(color: AppColors.border, height: 1),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Total', style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      'Total',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     Text(
                       priceFmt.format(order.total),
-                      style: Theme.of(context).textTheme.titleSmall
-                          ?.copyWith(color: AppColors.primary),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -128,7 +145,11 @@ class _DetailBody extends StatelessWidget {
               children: [
                 const Padding(
                   padding: EdgeInsets.only(top: 2),
-                  child: Icon(Icons.location_on_outlined, size: 18, color: AppColors.primary),
+                  child: Icon(
+                    Icons.location_on_outlined,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -138,8 +159,9 @@ class _DetailBody extends StatelessWidget {
                       if (detail.addressLabel.isNotEmpty)
                         Text(
                           detail.addressLabel,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontSize: 14),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(fontSize: 14),
                         ),
                       const SizedBox(height: 2),
                       Text(
@@ -153,7 +175,7 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
         ),
-        if (order.status == 'Sedang Dikemas') ...[
+        if (!isSeller && order.status == 'Sedang Dikemas') ...[
           const SizedBox(height: 16),
           TextButton(
             onPressed: null,
@@ -186,7 +208,11 @@ class _StatusBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(orderStatusIcon(status), size: 32, color: AppColors.textSecondary),
+          Icon(
+            orderStatusIcon(status),
+            size: 32,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -302,7 +328,9 @@ class _TimelineRow extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontSize: 14,
                       fontWeight: isFirst ? FontWeight.w600 : FontWeight.w400,
-                      color: isFirst ? AppColors.textPrimary : AppColors.textSecondary,
+                      color: isFirst
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -384,8 +412,9 @@ class _PriceRow extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium
-              ?.copyWith(color: AppColors.textPrimary),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
         ),
       ],
     );
