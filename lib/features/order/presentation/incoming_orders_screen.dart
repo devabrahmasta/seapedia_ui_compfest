@@ -40,24 +40,86 @@ class IncomingOrdersScreen extends ConsumerWidget {
               ),
             );
           }
+          final perluDiproses = orders.where((o) => o.status == 'Sedang Dikemas').toList();
+          final menungguKurir = orders.where((o) => o.status != 'Sedang Dikemas').toList();
+
           return RefreshIndicator(
             onRefresh: () => ref.refresh(incomingOrdersProvider.future),
-            child: ListView.separated(
+            child: ListView(
               padding: AppSpacing.screenPaddingHorizontal.add(
                 const EdgeInsets.symmetric(vertical: 16),
               ),
-              itemCount: orders.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, i) => _IncomingOrderCard(
-                order: orders[i],
-                dateFmt: _dateFmt,
-                priceFmt: _priceFmt,
-                onTap: () => context.push('/order/${orders[i].id}'),
-              ),
+              children: [
+                const _SectionHeader(title: 'Perlu Diproses', iconColor: AppColors.primary),
+                const SizedBox(height: 12),
+                if (perluDiproses.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Text('Tidak ada pesanan', style: TextStyle(color: AppColors.textSecondary)),
+                  )
+                else
+                  ...perluDiproses.map((o) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _IncomingOrderCard(
+                      order: o,
+                      dateFmt: _dateFmt,
+                      priceFmt: _priceFmt,
+                      onTap: () => context.push('/order/${o.id}'),
+                      accentColor: AppColors.primary,
+                    ),
+                  )),
+                const SizedBox(height: 12),
+                const _SectionHeader(title: 'Menunggu Kurir'),
+                const SizedBox(height: 12),
+                if (menungguKurir.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Text('Tidak ada pesanan', style: TextStyle(color: AppColors.textSecondary)),
+                  )
+                else
+                  ...menungguKurir.map((o) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _IncomingOrderCard(
+                      order: o,
+                      dateFmt: _dateFmt,
+                      priceFmt: _priceFmt,
+                      onTap: () => context.push('/order/${o.id}'),
+                    ),
+                  )),
+              ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final Color? iconColor;
+
+  const _SectionHeader({required this.title, this.iconColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (iconColor != null) ...[
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: iconColor, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+      ],
     );
   }
 }
@@ -67,12 +129,14 @@ class _IncomingOrderCard extends StatelessWidget {
   final DateFormat dateFmt;
   final NumberFormat priceFmt;
   final VoidCallback onTap;
+  final Color? accentColor;
 
   const _IncomingOrderCard({
     required this.order,
     required this.dateFmt,
     required this.priceFmt,
     required this.onTap,
+    this.accentColor,
   });
 
   String _buyerDisplay() {
@@ -92,6 +156,17 @@ class _IncomingOrderCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              if (accentColor != null) ...[
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Expanded(
                 child: Text(
                   '${_buyerDisplay()} · ${dateFmt.format(order.createdAt)}',

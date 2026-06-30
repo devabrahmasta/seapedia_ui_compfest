@@ -397,4 +397,13 @@ class OrderRepository {
         .single();
     return OrderDetail.fromJson(data);
   }
+
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
+    await _client.from('order_status_history').insert({
+      'order_id': orderId,
+      'status': newStatus,
+      'changed_at': DateTime.now().toIso8601String(),
+    });
+    await _client.from('orders').update({'status': newStatus}).eq('id', orderId);
+  }
 }
