@@ -137,8 +137,9 @@ class OrderSummary {
     final itemsRaw = json['order_items'] as List? ?? [];
     return OrderSummary(
       id: json['id'] as String,
-      storeName: storeData?['name'] as String? ?? 'Toko',
-      buyerName: profileData?['full_name'] as String? ??
+      storeName: storeData?['store_name'] as String? ?? 'Toko',
+      buyerName:
+          profileData?['full_name'] as String? ??
           profileData?['username'] as String?,
       status: json['status'] as String,
       total: (json['total'] as num).toDouble(),
@@ -173,14 +174,15 @@ class OrderDetail {
     final itemsRaw = json['order_items'] as List? ?? [];
     final historyRaw = json['order_status_history'] as List? ?? [];
 
-    final history = historyRaw
-        .map((e) => OrderStatusHistory.fromJson(e as Map<String, dynamic>))
-        .toList()
-      ..sort((a, b) => b.changedAt.compareTo(a.changedAt));
+    final history =
+        historyRaw
+            .map((e) => OrderStatusHistory.fromJson(e as Map<String, dynamic>))
+            .toList()
+          ..sort((a, b) => b.changedAt.compareTo(a.changedAt));
 
     return OrderDetail(
       order: Order.fromJson(json),
-      storeName: storeData?['name'] as String? ?? 'Toko',
+      storeName: storeData?['store_name'] as String? ?? 'Toko',
       addressLabel: addressData?['label'] as String? ?? '',
       addressFull: addressData?['full_address'] as String? ?? '',
       items: itemsRaw
@@ -278,20 +280,22 @@ class OrderRepository {
     final orderId = orderData['id'] as String;
 
     // 6. Insert order_items (snapshot nama dan harga)
-    await _client.from('order_items').insert(
-      items
-          .map(
-            (item) => {
-              'order_id': orderId,
-              'product_id': item['products']['id'] as String,
-              'product_name_snapshot': item['products']['name'] as String,
-              'price_snapshot':
-                  (item['products']['price'] as num).toDouble(),
-              'quantity': item['quantity'] as int,
-            },
-          )
-          .toList(),
-    );
+    await _client
+        .from('order_items')
+        .insert(
+          items
+              .map(
+                (item) => {
+                  'order_id': orderId,
+                  'product_id': item['products']['id'] as String,
+                  'product_name_snapshot': item['products']['name'] as String,
+                  'price_snapshot': (item['products']['price'] as num)
+                      .toDouble(),
+                  'quantity': item['quantity'] as int,
+                },
+              )
+              .toList(),
+        );
 
     // 7. Insert order_status_history
     await _client.from('order_status_history').insert({
@@ -325,10 +329,7 @@ class OrderRepository {
 
     // 10. Kosongkan cart
     await _client.from('cart_items').delete().eq('cart_id', cartId);
-    await _client
-        .from('carts')
-        .update({'store_id': null})
-        .eq('id', cartId);
+    await _client.from('carts').update({'store_id': null}).eq('id', cartId);
 
     return Order.fromJson(orderData);
   }
@@ -336,7 +337,9 @@ class OrderRepository {
   Future<List<OrderSummary>> getMyOrders(String buyerId) async {
     final data = await _client
         .from('orders')
-        .select('*, stores!store_id(name), order_items(product_name_snapshot)')
+        .select(
+          '*, stores!store_id(store_name), order_items(product_name_snapshot)',
+        )
         .eq('buyer_id', buyerId)
         .order('created_at', ascending: false);
     return (data as List)
@@ -361,7 +364,7 @@ class OrderRepository {
     final data = await _client
         .from('orders')
         .select(
-          '*, stores!store_id(name), addresses!address_id(label, full_address), order_items(*), order_status_history(*)',
+          '*, stores!store_id(store_name), addresses!address_id(label, full_address), order_items(*), order_status_history(*)',
         )
         .eq('id', orderId)
         .single();

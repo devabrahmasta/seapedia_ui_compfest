@@ -39,6 +39,7 @@ class CartItemWithProduct {
   final String productName;
   final double productPrice;
   final String? productImageUrl;
+  final int productStock;
 
   const CartItemWithProduct({
     required this.id,
@@ -48,6 +49,7 @@ class CartItemWithProduct {
     required this.productName,
     required this.productPrice,
     this.productImageUrl,
+    required this.productStock,
   });
 
   factory CartItemWithProduct.fromJson(Map<String, dynamic> json) =>
@@ -59,6 +61,7 @@ class CartItemWithProduct {
         productName: json['products']['name'] as String,
         productPrice: (json['products']['price'] as num).toDouble(),
         productImageUrl: json['products']['image_url'] as String?,
+        productStock: json['products']['stock'] as int,
       );
 }
 
@@ -88,13 +91,11 @@ class CartRepository {
   Future<List<CartItemWithProduct>> getCartItems(String cartId) async {
     final data = await _client
         .from('cart_items')
-        .select('*, products(name, price, image_url)')
+        .select('*, products(name, price, image_url, stock)')
         .eq('cart_id', cartId)
         .order('id');
 
-    return (data as List)
-        .map((e) => CartItemWithProduct.fromJson(e))
-        .toList();
+    return (data as List).map((e) => CartItemWithProduct.fromJson(e)).toList();
   }
 
   Future<void> addItem({
@@ -162,18 +163,12 @@ class CartRepository {
         .eq('cart_id', cartId);
 
     if ((remaining as List).isEmpty) {
-      await _client
-          .from('carts')
-          .update({'store_id': null})
-          .eq('id', cartId);
+      await _client.from('carts').update({'store_id': null}).eq('id', cartId);
     }
   }
 
   Future<void> clearCart(String cartId) async {
     await _client.from('cart_items').delete().eq('cart_id', cartId);
-    await _client
-        .from('carts')
-        .update({'store_id': null})
-        .eq('id', cartId);
+    await _client.from('carts').update({'store_id': null}).eq('id', cartId);
   }
 }

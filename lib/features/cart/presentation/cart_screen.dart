@@ -111,10 +111,7 @@ class _CartContent extends ConsumerWidget {
                 ),
               ),
               const Divider(color: AppColors.border, height: 32),
-              _SubtotalRow(
-                subtotal: cartState.subtotal,
-                formatter: formatter,
-              ),
+              _SubtotalRow(subtotal: cartState.subtotal, formatter: formatter),
               const SizedBox(height: 8),
             ],
           ),
@@ -171,9 +168,7 @@ class _CartItemRow extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Hapus Produk?'),
-        content: Text(
-          '${item.productName} akan dihapus dari keranjang.',
-        ),
+        content: Text('${item.productName} akan dihapus dari keranjang.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -197,73 +192,96 @@ class _CartItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 64,
-          height: 64,
-          child: ProductImage(
-            imageUrl: item.productImageUrl,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.productName,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                formatter.format(item.productPrice),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _QuantityStepper(
-                quantity: item.quantity,
-                onChanged: onQuantityChanged,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        GestureDetector(
-          onTap: () => _confirmRemove(context),
-          child: const Padding(
-            padding: EdgeInsets.all(4),
-            child: Icon(
-              Icons.delete_outline,
-              size: 20,
-              color: AppColors.textTertiary,
+    final isOutOfStock = item.productStock == 0;
+
+    return Opacity(
+      opacity: isOutOfStock ? 0.5 : 1.0,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 64,
+            height: 64,
+            child: ProductImage(
+              imageUrl: item.productImageUrl,
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.productName,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  formatter.format(item.productPrice),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                if (isOutOfStock) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Stok habis',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.danger,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                _QuantityStepper(
+                  quantity: item.quantity,
+                  maxQuantity: item.productStock,
+                  onChanged: onQuantityChanged,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => _confirmRemove(context),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(
+                Icons.delete_outline,
+                size: 20,
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _QuantityStepper extends StatelessWidget {
   final int quantity;
+  final int maxQuantity;
   final ValueChanged<int> onChanged;
 
-  const _QuantityStepper({required this.quantity, required this.onChanged});
+  const _QuantityStepper({
+    required this.quantity,
+    required this.maxQuantity,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final canIncrease = quantity < maxQuantity;
+
     return Container(
       height: 32,
       decoration: BoxDecoration(
@@ -289,7 +307,7 @@ class _QuantityStepper extends StatelessWidget {
           ),
           _StepperButton(
             icon: Icons.add,
-            onTap: () => onChanged(quantity + 1),
+            onTap: canIncrease ? () => onChanged(quantity + 1) : null,
           ),
         ],
       ),
@@ -299,18 +317,24 @@ class _QuantityStepper extends StatelessWidget {
 
 class _StepperButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _StepperButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final isDisabled = onTap == null;
+
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
         width: 32,
         height: 32,
-        child: Icon(icon, size: 16, color: AppColors.textPrimary),
+        child: Icon(
+          icon,
+          size: 16,
+          color: isDisabled ? AppColors.textTertiary : AppColors.textPrimary,
+        ),
       ),
     );
   }
@@ -327,10 +351,7 @@ class _SubtotalRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Subtotal',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        Text('Subtotal', style: Theme.of(context).textTheme.bodyMedium),
         Text(
           formatter.format(subtotal),
           style: Theme.of(context).textTheme.titleSmall,
