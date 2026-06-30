@@ -7,6 +7,9 @@ import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dar
 import 'package:seapedia_ui_compfest/features/order/application/order_provider.dart';
 import 'package:seapedia_ui_compfest/features/order/data/order_repository.dart';
 import 'package:seapedia_ui_compfest/features/order/presentation/order_status.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/widgets/order_action_buyer.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/widgets/order_action_driver.dart';
+import 'package:seapedia_ui_compfest/features/order/presentation/widgets/order_action_seller.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
   final String orderId;
@@ -40,7 +43,7 @@ class OrderDetailScreen extends ConsumerWidget {
           timeFmt: _timeFmt,
           priceFmt: _priceFmt,
           compact: _compact,
-          isSeller: activeRole == 'seller',
+          activeRole: activeRole,
         ),
       ),
     );
@@ -52,14 +55,14 @@ class _DetailBody extends StatelessWidget {
   final DateFormat timeFmt;
   final NumberFormat priceFmt;
   final String Function(double) compact;
-  final bool isSeller;
+  final String? activeRole;
 
   const _DetailBody({
     required this.detail,
     required this.timeFmt,
     required this.priceFmt,
     required this.compact,
-    required this.isSeller,
+    required this.activeRole,
   });
 
   @override
@@ -175,16 +178,12 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
         ),
-        if (!isSeller && order.status == 'Sedang Dikemas') ...[
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: null,
-            child: Text(
-              'Hubungi Penjual',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-        ],
+        switch (activeRole) {
+          'buyer' => OrderActionBuyer(order: order),
+          'seller' => OrderActionSeller(order: order),
+          'driver' => OrderActionDriver(order: order),
+          _ => const SizedBox.shrink(),
+        },
         const SizedBox(height: 12),
       ],
     );
