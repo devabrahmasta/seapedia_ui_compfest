@@ -40,6 +40,17 @@ Berikut adalah daftar peran dan hak aksesnya:
 
 > **Akses Demo Akun**: Anda dapat mendaftar langsung lewat aplikasi (Form Register). Aplikasi otomatis akan menyuntikkan *role* berdasarkan kotak centang (checkbox) yang dipilih saat pendaftaran. Akun bisa memiliki peran ganda (Multi-Role), dan Anda dapat beralih peran lewat halaman profil (*Role Selection*).
 
+atau: 
+### Daftar Demo Akun
+
+|  No | Role         | Email         | Password | Keterangan                                                                                                                                                          |
+| :-: | ------------ | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  1  | Demo Account | `b@gmail.com` | `bbbbbb` | Akun demo yang telah disediakan (role : buyer, driver, seller)                                                                                                      |
+|  2  | Demo Account | `c@gmail.com` | `cccccc` | Akun demo yang telah disediakan (role : buyer, driver, seller)                                                                                                      |
+|  3  | Admin Account | `admin@gmail.com` | `admin` | Akun admin yang telah disediakan (role : admin)                                                                                                                      |
+|  -  | Akun Baru    | -             | -        | Anda bisa mendaftar dan memilih role sesuai keinginan                                                                                                               |
+
+
 ---
 
 ## 3. Dokumentasi Keputusan Bisnis & Fitur
