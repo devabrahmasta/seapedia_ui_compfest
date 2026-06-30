@@ -18,6 +18,7 @@ class StoreSetupScreen extends ConsumerStatefulWidget {
 class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
   final _storeNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _addressController = TextEditingController();
   bool _isSubmitting = false;
   String? _error;
 
@@ -25,12 +26,14 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
   void dispose() {
     _storeNameController.dispose();
     _descriptionController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSubmit() async {
     final storeName = _storeNameController.text.trim();
     final description = _descriptionController.text.trim();
+    final address = _addressController.text.trim();
 
     if (storeName.isEmpty) {
       setState(() => _error = 'Nama toko wajib diisi');
@@ -49,6 +52,7 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
         sellerId: session!.user.id,
         storeName: storeName,
         description: description.isEmpty ? null : description,
+        address: address.isEmpty ? null : address,
       );
       ref.invalidate(myStoreProvider);
       await ref.read(myStoreProvider.future);
@@ -91,6 +95,12 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
               AppTextField(
                 label: 'Deskripsi (opsional)',
                 controller: _descriptionController,
+              ),
+              const SizedBox(height: 12),
+              AppTextField(
+                label: 'Alamat Toko (opsional)',
+                controller: _addressController,
+                prefixIcon: Icons.location_on_outlined,
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),

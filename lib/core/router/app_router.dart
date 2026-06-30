@@ -13,7 +13,10 @@ import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_dash
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_report_screen.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/seller_main_screen.dart';
 import 'package:seapedia_ui_compfest/features/dashboard/presentation/driver_main_screen.dart';
+import 'package:seapedia_ui_compfest/features/delivery/presentation/driver_earnings_screen.dart';
+import 'package:seapedia_ui_compfest/features/delivery/presentation/job_completed_screen.dart';
 import 'package:seapedia_ui_compfest/features/delivery/presentation/job_detail_screen.dart';
+import 'package:seapedia_ui_compfest/features/delivery/presentation/job_history_screen.dart';
 import 'package:seapedia_ui_compfest/features/delivery/presentation/job_search_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/landing_screen.dart';
 import 'package:seapedia_ui_compfest/features/product/presentation/product_detail_screeen.dart';
@@ -188,6 +191,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/driver/job-completed',
+        builder: (context, state) {
+          final earning = state.extra as double;
+          return JobCompletedScreen(earning: earning);
+        },
+      ),
+      GoRoute(
         path: '/promo-selection',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
@@ -354,8 +364,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/driver/history',
-                builder: (context, state) =>
-                    const Center(child: Text('Riwayat Job')),
+                builder: (context, state) => const JobHistoryScreen(),
               ),
             ],
           ),
@@ -363,8 +372,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/driver/earnings',
-                builder: (context, state) =>
-                    const Center(child: Text('Pendapatan')),
+                builder: (context, state) => const DriverEarningsScreen(),
               ),
             ],
           ),

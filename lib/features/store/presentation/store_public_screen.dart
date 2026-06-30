@@ -123,6 +123,27 @@ class _StoreHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(store.storeName, style: Theme.of(context).textTheme.titleLarge),
+          if (store.address != null && store.address!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 14,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    store.address!,
+                    style: Theme.of(context).textTheme.labelSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 4),
           Text(
             store.description ?? 'Toko',

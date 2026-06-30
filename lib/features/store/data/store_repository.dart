@@ -5,6 +5,7 @@ class Store {
   final String sellerId;
   final String storeName;
   final String? description;
+  final String? address;
   final DateTime createdAt;
 
   const Store({
@@ -12,6 +13,7 @@ class Store {
     required this.sellerId,
     required this.storeName,
     required this.description,
+    required this.address,
     required this.createdAt,
   });
 
@@ -21,6 +23,7 @@ class Store {
       sellerId: json['seller_id'] as String,
       storeName: json['store_name'] as String,
       description: json['description'] as String?,
+      address: json['address'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -44,6 +47,7 @@ class StoreRepository {
     required String sellerId,
     required String storeName,
     String? description,
+    String? address,
   }) async {
     final response = await _client
         .from('stores')
@@ -51,6 +55,7 @@ class StoreRepository {
           'seller_id': sellerId,
           'store_name': storeName,
           'description': description,
+          'address': address,
         })
         .select()
         .single();
@@ -61,10 +66,15 @@ class StoreRepository {
     required String storeId,
     required String storeName,
     String? description,
+    String? address,
   }) async {
     final response = await _client
         .from('stores')
-        .update({'store_name': storeName, 'description': description})
+        .update({
+          'store_name': storeName,
+          'description': description,
+          'address': address,
+        })
         .eq('id', storeId)
         .select()
         .single();

@@ -1,34 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_card.dart';
+import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/delivery/application/delivery_job_provider.dart';
 import 'package:seapedia_ui_compfest/features/delivery/data/delivery_job_repository.dart';
 import 'package:seapedia_ui_compfest/features/delivery/presentation/delivery_method_label.dart';
 
-class JobDetailScreen extends ConsumerWidget {
+class JobDetailScreen extends ConsumerStatefulWidget {
   final String jobId;
 
   const JobDetailScreen({super.key, required this.jobId});
 
+  @override
+  ConsumerState<JobDetailScreen> createState() => _JobDetailScreenState();
+}
+
+class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
   static final _priceFmt = NumberFormat.currency(
     locale: 'id_ID',
     symbol: 'Rp',
     decimalDigits: 0,
   );
 
+  bool _isLoading = false;
+
+  Future<void> _takeJob(DeliveryJobDetail detail) async {
+    final driverId = ref.read(authProvider).value?.user.id;
+    if (driverId == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await ref
+          .read(deliveryJobRepositoryProvider)
+          .takeJob(detail.job.id, driverId);
+      ref.invalidate(availableJobsProvider);
+      if (mounted) context.go('/order/${detail.job.orderId}');
+    } on JobAlreadyTakenException {
+      if (mounted) await _showJobTakenDialog();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal mengambil job: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _showJobTakenDialog() {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.inventory_2_outlined,
+                color: AppColors.textSecondary,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Job Sudah Diambil',
+              textAlign: TextAlign.center,
+              style: Theme.of(ctx).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Job ini baru saja diambil oleh kurir lain. Coba job lain yang masih tersedia.',
+              textAlign: TextAlign.center,
+              style: Theme.of(ctx).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              label: 'Kembali ke Daftar Job',
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                context.go('/driver/jobs');
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(jobDetailProvider(jobId));
+  Widget build(BuildContext context) {
+    final detailAsync = ref.watch(jobDetailProvider(widget.jobId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Job'), centerTitle: true),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat job: $e')),
-        data: (detail) => _DetailBody(detail: detail, priceFmt: _priceFmt),
+        data: (detail) => _DetailBody(
+          detail: detail,
+          priceFmt: _priceFmt,
+          isLoading: _isLoading,
+          onTakeJob: () => _takeJob(detail),
+        ),
       ),
     );
   }
@@ -37,8 +127,15 @@ class JobDetailScreen extends ConsumerWidget {
 class _DetailBody extends StatelessWidget {
   final DeliveryJobDetail detail;
   final NumberFormat priceFmt;
+  final bool isLoading;
+  final VoidCallback onTakeJob;
 
-  const _DetailBody({required this.detail, required this.priceFmt});
+  const _DetailBody({
+    required this.detail,
+    required this.priceFmt,
+    required this.isLoading,
+    required this.onTakeJob,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +175,7 @@ class _DetailBody extends StatelessWidget {
                         icon: Icons.storefront_outlined,
                         label: 'Ambil dari',
                         name: detail.storeName,
-                        address: '',
+                        address: detail.storeAddress ?? '',
                       ),
                       const SizedBox(height: 8),
                       Padding(
@@ -148,10 +245,9 @@ class _DetailBody extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: AppButton(
-                label: 'Ambil Job',
-                onPressed: () {
-                  // TODO: implementasi takeJob di Tahap 2
-                },
+                label: isLoading ? 'Mengambil...' : 'Ambil Job',
+                isLoading: isLoading,
+                onPressed: isLoading ? null : onTakeJob,
               ),
             ),
           ),
