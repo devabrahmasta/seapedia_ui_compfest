@@ -34,7 +34,11 @@ class OrderDetailScreen extends ConsumerWidget {
     final activeRole = ref.watch(activeRoleProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Pesanan'), centerTitle: true),
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Detail Pesanan'), 
+        centerTitle: true,
+      ),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat detail: $e')),

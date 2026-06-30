@@ -49,39 +49,9 @@ class _DriverProfileSectionState extends State<DriverProfileSection> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Material(
-              color: Colors.transparent,
-              child: _MenuTile(
-                icon: Icons.history,
-                label: 'Riwayat Pengantaran',
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
 }
 
-class _MenuTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
-  const _MenuTile({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      leading: Icon(icon, color: AppColors.textPrimary),
-      title: Text(label, style: const TextStyle(color: AppColors.textPrimary)),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textTertiary),
-      onTap: () {},
-    );
-  }
-}

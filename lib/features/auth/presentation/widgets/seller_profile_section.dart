@@ -70,16 +70,8 @@ class SellerProfileSection extends ConsumerWidget {
                     children: [
                       _MenuTile(
                         icon: Icons.storefront_outlined,
-                        label: 'Kelola Toko',
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: AppColors.border,
-                      ),
-                      _MenuTile(
-                        icon: Icons.bar_chart_outlined,
-                        label: 'Pendapatan Toko',
+                        label: 'Edit Info Toko',
+                        onTap: () => context.push('/store-setup'),
                       ),
                     ],
                   ),
@@ -130,8 +122,13 @@ class _NoStoreCard extends StatelessWidget {
 class _MenuTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _MenuTile({required this.icon, required this.label});
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +137,11 @@ class _MenuTile extends StatelessWidget {
       leading: Icon(icon, color: AppColors.textPrimary),
       title: Text(label, style: const TextStyle(color: AppColors.textPrimary)),
       trailing: const Icon(Icons.chevron_right, color: AppColors.textTertiary),
-      onTap: () {},
+      onTap: onTap ?? () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fitur $label akan segera hadir!')),
+        );
+      },
     );
   }
 }

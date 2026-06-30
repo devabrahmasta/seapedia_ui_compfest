@@ -28,7 +28,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
     final storeAsync = ref.watch(myStoreProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: storeAsync.when(
@@ -62,12 +62,12 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                                 width: 56,
                                 height: 56,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: AppColors.surface,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Icon(
                                   Icons.storefront,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   size: 28,
                                 ),
                               ),
@@ -79,7 +79,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                                     Text(
                                       store.storeName,
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.textPrimary,
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -89,14 +89,14 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                                       children: [
                                         const Icon(
                                           Icons.check_circle_outline,
-                                          color: Colors.white,
+                                          color: AppColors.textPrimary,
                                           size: 16,
                                         ),
                                         const SizedBox(width: 4),
                                         const Text(
                                           'Penjual terverifikasi',
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: AppColors.textPrimary,
                                             fontSize: 13,
                                           ),
                                         ),
@@ -190,17 +190,13 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Produk Saya',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall,
                               ),
                               ElevatedButton.icon(
                                 onPressed: () {
-                                  // Navigate to seller products tab
-                                  context.go('/seller/products');
+                                  context.push('/seller/products/new');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
@@ -357,15 +353,21 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
             ),
           ),
           Material(
-            color: const Color(
-              0xFF1E8F43,
-            ), // Slightly darker green for the bottom bar
+            color: Colors.transparent,
             child: InkWell(
               onTap: () => context.go('/seller/reports'),
-              child: Padding(
+              child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,
+                ),
+                decoration: const BoxDecoration(
+                  color: AppColors.surface,
+
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -373,7 +375,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                     Text(
                       '$completedOrderCount pesanan selesai',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textSecondary,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -381,7 +383,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                     const Text(
                       'Lihat laporan >',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textSecondary,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -556,10 +558,6 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                   ),
                 ],
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
-              onPressed: () {},
             ),
           ],
         ),

@@ -44,7 +44,7 @@ class JobCompletedScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Pesanan Selesai',
+                        'Pengantaran Selesai',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -80,7 +80,7 @@ class JobCompletedScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  label: 'Kembali ke Daftar Job',
+                  label: 'Kembali ke Dashboard',
                   onPressed: () => context.go('/driver/jobs'),
                 ),
               ),

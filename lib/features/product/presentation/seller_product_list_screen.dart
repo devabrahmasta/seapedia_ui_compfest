@@ -127,9 +127,29 @@ class _ProductRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  product.name,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        product.name,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (!product.isActive) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Text('Nonaktif', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -162,11 +182,16 @@ class _ProductRow extends ConsumerWidget {
                 );
               } else if (value == 'delete') {
                 _confirmDelete(context, ref, product);
+              } else if (value == 'activate') {
+                _activateProduct(context, ref, product);
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'edit', child: Text('Edit')),
-              const PopupMenuItem(value: 'delete', child: Text('Hapus')),
+              if (product.isActive)
+                const PopupMenuItem(value: 'delete', child: Text('Nonaktifkan')),
+              if (!product.isActive)
+                const PopupMenuItem(value: 'activate', child: Text('Aktifkan')),
             ],
           ),
         ],
@@ -182,8 +207,10 @@ class _ProductRow extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus produk?'),
-        content: Text('${product.name} akan dihapus permanen.'),
+        title: const Text('Nonaktifkan produk ini?'),
+        content: const Text(
+          'Produk tidak akan tampil lagi di toko, tapi riwayat pesanan yang sudah ada tetap tersimpan.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -192,7 +219,7 @@ class _ProductRow extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
-              'Hapus',
+              'Nonaktifkan',
               style: TextStyle(color: AppColors.danger),
             ),
           ),
@@ -205,5 +232,15 @@ class _ProductRow extends ConsumerWidget {
       await repository.deleteProduct(product.id);
       ref.invalidate(myProductsProvider);
     }
+  }
+
+  Future<void> _activateProduct(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+  ) async {
+    final repository = ref.read(productRepositoryProvider);
+    await repository.activateProduct(product.id);
+    ref.invalidate(myProductsProvider);
   }
 }

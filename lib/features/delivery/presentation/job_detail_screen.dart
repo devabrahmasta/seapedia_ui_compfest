@@ -37,8 +37,9 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
       await ref
           .read(deliveryJobRepositoryProvider)
           .takeJob(detail.job.id, driverId);
+      ref.invalidate(activeJobProvider);
       ref.invalidate(availableJobsProvider);
-      if (mounted) context.go('/order/${detail.job.orderId}');
+      if (mounted) context.push('/order/${detail.job.orderId}');
     } on JobAlreadyTakenException {
       if (mounted) await _showJobTakenDialog();
     } catch (e) {

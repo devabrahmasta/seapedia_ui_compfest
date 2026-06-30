@@ -261,6 +261,41 @@ class _ProductCartAction extends ConsumerWidget {
 
   const _ProductCartAction({required this.product});
 
+  Future<void> _buyNow(BuildContext context, WidgetRef ref) async {
+    final session = ref.read(authProvider).value;
+    if (session == null) {
+      context.go('/login');
+      return;
+    }
+    try {
+      await ref.read(cartProvider.notifier).addItem(
+            productId: product.id,
+            storeId: product.storeId,
+            storeName: product.storeName,
+          );
+      if (context.mounted) context.push('/cart');
+    } on CartDifferentStoreException catch (_) {
+      try {
+        await ref.read(cartProvider.notifier).clearAndAddItem(
+              productId: product.id,
+              storeId: product.storeId,
+              storeName: product.storeName,
+            );
+        if (context.mounted) context.push('/cart');
+      } catch (_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal memproses Beli Sekarang')),
+        );
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memproses Beli Sekarang')),
+      );
+    }
+  }
+
   Future<void> _addToCart(BuildContext context, WidgetRef ref) async {
     final session = ref.read(authProvider).value;
     if (session == null) {
@@ -374,9 +409,26 @@ class _ProductCartAction extends ConsumerWidget {
       );
     }
 
-    return AppButton(
-      label: 'Tambah ke Keranjang',
-      onPressed: () => _addToCart(context, ref),
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => _buyNow(context, ref),
+            style: OutlinedButton.styleFrom(
+              shape: const StadiumBorder(),
+              side: const BorderSide(color: AppColors.primary),
+            ),
+            child: const Text('Beli Sekarang', style: TextStyle(color: AppColors.primary)),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: AppButton(
+            label: 'Keranjang',
+            onPressed: () => _addToCart(context, ref),
+          ),
+        ),
+      ],
     );
   }
 }

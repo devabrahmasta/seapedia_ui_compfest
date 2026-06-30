@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:seapedia_ui_compfest/core/theme/theme.dart';
 import 'package:seapedia_ui_compfest/features/admin/presentation/admin_dashboard_screen.dart';
 import 'package:seapedia_ui_compfest/features/admin/presentation/admin_main_screen.dart';
 import 'package:seapedia_ui_compfest/features/admin/presentation/voucher_promo_screen.dart';
@@ -93,7 +94,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           path.startsWith('/store') ||
           path == '/write-review';
 
-      if (authState.isLoading && !authState.hasValue) return null;
+      if (authState.isLoading && !authState.hasValue) return '/loading';
 
       if (!isLoggedIn) {
         if (isAuthPage || isPublicPage) return null;
@@ -101,7 +102,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (activeRoleState.isLoading && !activeRoleState.hasValue) {
-        return null;
+        return '/loading';
       }
 
       if (activeRole == null) {
@@ -149,6 +150,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/loading',
+        builder: (context, state) => const Scaffold(
+          backgroundColor: AppColors.primary,
+          body: Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        ),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',

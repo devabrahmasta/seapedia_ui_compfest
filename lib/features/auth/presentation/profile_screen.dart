@@ -230,7 +230,12 @@ class _MenuTile extends StatelessWidget {
       trailing: isDanger
           ? null
           : const Icon(Icons.chevron_right, color: AppColors.textTertiary),
-      onTap: onTap ?? () {},
+      onTap: onTap ??
+          () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Fitur $label akan segera hadir!')),
+            );
+          },
     );
   }
 }

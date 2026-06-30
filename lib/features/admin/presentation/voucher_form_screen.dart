@@ -162,7 +162,7 @@ class _VoucherFormScreenState extends ConsumerState<VoucherFormScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _discountType,
+                initialValue: _discountType,
                 decoration: const InputDecoration(
                   labelText: 'Tipe Diskon',
                   border: OutlineInputBorder(),

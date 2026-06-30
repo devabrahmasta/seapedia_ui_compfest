@@ -7,6 +7,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
+import 'package:seapedia_ui_compfest/features/store/data/store_repository.dart';
 
 class StoreSetupScreen extends ConsumerStatefulWidget {
   const StoreSetupScreen({super.key});
@@ -21,6 +22,25 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
   final _addressController = TextEditingController();
   bool _isSubmitting = false;
   String? _error;
+  bool _isEditing = false;
+  Store? _store;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final store = ref.read(myStoreProvider).value;
+      if (store != null) {
+        setState(() {
+          _isEditing = true;
+          _store = store;
+          _storeNameController.text = store.storeName;
+          _descriptionController.text = store.description ?? '';
+          _addressController.text = store.address ?? '';
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -39,6 +59,10 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
       setState(() => _error = 'Nama toko wajib diisi');
       return;
     }
+    if (address.isEmpty) {
+      setState(() => _error = 'Alamat toko wajib diisi');
+      return;
+    }
 
     setState(() {
       _isSubmitting = true;
@@ -48,12 +72,22 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
     try {
       final session = ref.read(authProvider).value;
       final repository = ref.read(storeRepositoryProvider);
-      await repository.createStore(
-        sellerId: session!.user.id,
-        storeName: storeName,
-        description: description.isEmpty ? null : description,
-        address: address.isEmpty ? null : address,
-      );
+      
+      if (_isEditing && _store != null) {
+        await repository.updateStore(
+          storeId: _store!.id,
+          storeName: _store!.storeName,
+          description: description.isEmpty ? null : description,
+          address: address,
+        );
+      } else {
+        await repository.createStore(
+          sellerId: session!.user.id,
+          storeName: storeName,
+          description: description.isEmpty ? null : description,
+          address: address,
+        );
+      }
       ref.invalidate(myStoreProvider);
       await ref.read(myStoreProvider.future);
       if (mounted) context.go('/seller/dashboard');
@@ -75,13 +109,13 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
             children: [
               const SizedBox(height: 32),
               Text(
-                'Buat Toko Kamu',
+                _isEditing ? 'Edit Info Toko' : 'Buat Toko Kamu',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Lengkapi info toko sebelum mulai berjualan',
+                _isEditing ? 'Perbarui alamat dan deskripsi toko' : 'Lengkapi info toko sebelum mulai berjualan',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -90,6 +124,7 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
                 label: 'Nama Toko',
                 controller: _storeNameController,
                 prefixIcon: Icons.storefront_outlined,
+                readOnly: _isEditing,
               ),
               const SizedBox(height: 12),
               AppTextField(
@@ -98,7 +133,7 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
               ),
               const SizedBox(height: 12),
               AppTextField(
-                label: 'Alamat Toko (opsional)',
+                label: 'Alamat Toko',
                 controller: _addressController,
                 prefixIcon: Icons.location_on_outlined,
               ),
@@ -113,7 +148,7 @@ class _StoreSetupScreenState extends ConsumerState<StoreSetupScreen> {
               ],
               const SizedBox(height: 24),
               AppButton(
-                label: _isSubmitting ? 'Menyimpan...' : 'Buat Toko',
+                label: _isSubmitting ? 'Menyimpan...' : (_isEditing ? 'Simpan Perubahan' : 'Buat Toko'),
                 onPressed: _isSubmitting ? null : _handleSubmit,
               ),
             ],

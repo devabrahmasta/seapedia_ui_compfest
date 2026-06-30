@@ -9,7 +9,6 @@ import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dar
 import 'package:seapedia_ui_compfest/features/delivery/application/delivery_job_provider.dart';
 import 'package:seapedia_ui_compfest/features/delivery/data/delivery_job_repository.dart';
 import 'package:seapedia_ui_compfest/features/delivery/presentation/delivery_method_label.dart';
-import 'package:seapedia_ui_compfest/features/order/application/order_provider.dart';
 
 class JobSearchScreen extends ConsumerWidget {
   const JobSearchScreen({super.key});

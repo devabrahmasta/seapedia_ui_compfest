@@ -11,6 +11,7 @@ class Product {
   final String storeName;
   final String? imageUrl;
   final DateTime createdAt;
+  final bool isActive;
 
   const Product({
     required this.id,
@@ -22,6 +23,7 @@ class Product {
     required this.storeName,
     this.imageUrl,
     required this.createdAt,
+    this.isActive = true,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class Product {
       storeName: json['stores']?['store_name'] as String? ?? 'Toko',
       imageUrl: json['image_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
+      isActive: json['is_active'] as bool? ?? true,
     );
   }
 }
@@ -44,12 +47,17 @@ class ProductRepository {
 
   final SupabaseClient _client;
 
-  Future<List<Product>> fetchMyProducts(String storeId) async {
-    final response = await _client
+  Future<List<Product>> fetchMyProducts(String storeId, {bool activeOnly = false}) async {
+    var query = _client
         .from('products')
         .select('*, stores(store_name)')
-        .eq('store_id', storeId)
-        .order('created_at', ascending: false);
+        .eq('store_id', storeId);
+
+    if (activeOnly) {
+      query = query.eq('is_active', true);
+    }
+
+    final response = await query.order('created_at', ascending: false);
 
     return (response as List).map((json) => Product.fromJson(json)).toList();
   }
@@ -58,6 +66,7 @@ class ProductRepository {
     final response = await _client
         .from('products')
         .select('*, stores(store_name)')
+        .eq('is_active', true)
         .order('created_at', ascending: false);
 
     return (response as List).map((json) => Product.fromJson(json)).toList();
@@ -123,7 +132,11 @@ class ProductRepository {
   }
 
   Future<void> deleteProduct(String productId) async {
-    await _client.from('products').delete().eq('id', productId);
+    await _client.from('products').update({'is_active': false}).eq('id', productId);
+  }
+
+  Future<void> activateProduct(String productId) async {
+    await _client.from('products').update({'is_active': true}).eq('id', productId);
   }
 
   Future<String> uploadProductImage(String storeId, File file) async {
