@@ -9,3 +9,11 @@ final promoRepositoryProvider = Provider<PromoRepository>((ref) {
 final availablePromosProvider = FutureProvider<List<PromoCode>>((ref) async {
   return ref.read(promoRepositoryProvider).getAvailablePromos();
 });
+
+final allVouchersProvider = FutureProvider<List<PromoCode>>((ref) async {
+  return ref.watch(promoRepositoryProvider).getAllVouchers();
+});
+
+final allPromosProvider = FutureProvider<List<PromoCode>>((ref) async {
+  return ref.watch(promoRepositoryProvider).getAllPromos();
+});

@@ -21,7 +21,7 @@ class PromoCode {
   final String id;
   final String code;
   final double discountValue;
-  final String discountType; 
+  final String discountType;
   final DateTime expiryDate;
   final int? usageLimit;
   final int? usageCount;
@@ -132,5 +132,56 @@ class PromoRepository {
     }
 
     throw PromoNotFoundException(trimmed);
+  }
+
+  Future<void> createVoucher({
+    required String code,
+    required double discountValue,
+    required String discountType,
+    required int usageLimit,
+    required DateTime expiryDate,
+  }) async {
+    await _client.from('vouchers').insert({
+      'code': code.trim(),
+      'discount_value': discountValue,
+      'discount_type': discountType,
+      'usage_limit': usageLimit,
+      'usage_count': 0,
+      'expiry_date': expiryDate.toIso8601String(),
+    });
+  }
+
+  Future<void> createPromo({
+    required String code,
+    required double discountValue,
+    required String discountType,
+    required DateTime expiryDate,
+  }) async {
+    await _client.from('promos').insert({
+      'code': code.trim(),
+      'discount_value': discountValue,
+      'discount_type': discountType,
+      'expiry_date': expiryDate.toIso8601String(),
+    });
+  }
+
+  Future<List<PromoCode>> getAllVouchers() async {
+    final response = await _client
+        .from('vouchers')
+        .select()
+        .order('expiry_date', ascending: false);
+    return (response as List)
+        .map((e) => PromoCode.fromVoucherJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<PromoCode>> getAllPromos() async {
+    final response = await _client
+        .from('promos')
+        .select()
+        .order('expiry_date', ascending: false);
+    return (response as List)
+        .map((e) => PromoCode.fromPromoJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

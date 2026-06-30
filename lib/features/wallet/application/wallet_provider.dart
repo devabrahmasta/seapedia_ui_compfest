@@ -15,8 +15,9 @@ final myWalletProvider = FutureProvider<Wallet?>((ref) async {
   return repository.getOrCreateWallet(session.user.id);
 });
 
-final walletTransactionsProvider =
-    FutureProvider<List<WalletTransaction>>((ref) async {
+final walletTransactionsProvider = FutureProvider<List<WalletTransaction>>((
+  ref,
+) async {
   final wallet = await ref.watch(myWalletProvider.future);
   if (wallet == null) return [];
 

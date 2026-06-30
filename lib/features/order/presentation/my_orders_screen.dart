@@ -34,7 +34,10 @@ class MyOrdersScreen extends ConsumerWidget {
         data: (orders) {
           if (orders.isEmpty) {
             return const Center(
-              child: Text('Belum ada pesanan', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                'Belum ada pesanan',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             );
           }
           return RefreshIndicator(
@@ -108,7 +111,11 @@ class _OrderCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(orderStatusIcon(order.status), size: 16, color: AppColors.textSecondary),
+              Icon(
+                orderStatusIcon(order.status),
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -118,7 +125,9 @@ class _OrderCard extends StatelessWidget {
               ),
               Text(
                 priceFmt.format(order.total),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 14),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontSize: 14),
               ),
             ],
           ),

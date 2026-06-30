@@ -46,7 +46,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final addresses = ref.watch(myAddressesProvider).value ?? [];
-    final effectiveAddress = _selectedAddress ?? (addresses.isNotEmpty ? addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first) : null);
+    final effectiveAddress =
+        _selectedAddress ??
+        (addresses.isNotEmpty
+            ? addresses.firstWhere(
+                (a) => a.isDefault,
+                orElse: () => addresses.first,
+              )
+            : null);
 
     final cartAsync = ref.watch(cartProvider);
     final walletAsync = ref.watch(myWalletProvider);
@@ -62,8 +69,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat cart: $e')),
         data: (cart) {
-          if (cart.isEmpty)
+          if (cart.isEmpty) {
             return const Center(child: Text('Keranjang kosong'));
+          }
 
           final subtotal = cart.subtotal;
           final discountAmount =
@@ -389,7 +397,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _Section extends StatelessWidget {
   final String title;
@@ -410,7 +417,6 @@ class _Section extends StatelessWidget {
   }
 }
 
-// ── Alamat ───────────────────────────────────────────────────────────────────
 
 class _AddressCard extends StatelessWidget {
   final Address? address;
@@ -465,7 +471,6 @@ class _AddressCard extends StatelessWidget {
   }
 }
 
-// ── Metode pengiriman ─────────────────────────────────────────────────────────
 
 class _DeliveryCard extends StatelessWidget {
   final String method;
@@ -527,7 +532,6 @@ class _DeliveryCard extends StatelessWidget {
   }
 }
 
-// ── Produk ────────────────────────────────────────────────────────────────────
 
 class _ProductRow extends StatelessWidget {
   final CartItemWithProduct item;
@@ -569,7 +573,6 @@ class _ProductRow extends StatelessWidget {
   }
 }
 
-// ── Rincian ───────────────────────────────────────────────────────────────────
 
 class _PriceRow extends StatelessWidget {
   final String label;
@@ -595,7 +598,6 @@ class _PriceRow extends StatelessWidget {
   }
 }
 
-// ── Promo ─────────────────────────────────────────────────────────────────────
 
 class _PromoCard extends StatelessWidget {
   final PromoCode? promo;
@@ -658,7 +660,6 @@ class _PromoCard extends StatelessWidget {
   }
 }
 
-// ── Pay bar ───────────────────────────────────────────────────────────────────
 
 class _PayBar extends StatelessWidget {
   final double total;
@@ -763,7 +764,6 @@ class _PayBar extends StatelessWidget {
   }
 }
 
-// ── Address picker sheet ──────────────────────────────────────────────────────
 
 class _AddressPickerSheet extends StatelessWidget {
   final List<Address> addresses;
@@ -875,7 +875,6 @@ class _AddressPickerSheet extends StatelessWidget {
   }
 }
 
-// ── Delivery picker sheet ─────────────────────────────────────────────────────
 
 class _DeliveryPickerSheet extends StatelessWidget {
   final String selected;

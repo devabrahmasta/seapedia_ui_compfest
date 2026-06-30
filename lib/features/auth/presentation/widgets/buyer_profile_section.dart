@@ -48,7 +48,9 @@ class BuyerProfileSection extends ConsumerWidget {
                       const SizedBox(height: 8),
                       walletAsync.when(
                         data: (wallet) => Text(
-                          wallet != null ? formatter.format(wallet.balance) : 'Rp -',
+                          wallet != null
+                              ? formatter.format(wallet.balance)
+                              : 'Rp -',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         loading: () => const SizedBox(
@@ -101,8 +103,15 @@ class BuyerProfileSection extends ConsumerWidget {
               child: Column(
                 children: [
                   _MenuTile(icon: Icons.favorite_border, label: 'Wishlist'),
-                  const Divider(height: 1, thickness: 1, color: AppColors.border),
-                  _MenuTile(icon: Icons.confirmation_number_outlined, label: 'Voucher Saya'),
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.border,
+                  ),
+                  _MenuTile(
+                    icon: Icons.confirmation_number_outlined,
+                    label: 'Voucher Saya',
+                  ),
                 ],
               ),
             ),

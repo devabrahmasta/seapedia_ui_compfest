@@ -32,9 +32,9 @@ class _OrderActionSellerState extends ConsumerState<OrderActionSeller> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memproses pesanan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memproses pesanan: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -71,13 +71,12 @@ class _OrderActionSellerState extends ConsumerState<OrderActionSeller> {
         Expanded(
           child: Text(
             'Menunggu kurir mengambil pesanan',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
         ),
       ],
     );
   }
 }
-

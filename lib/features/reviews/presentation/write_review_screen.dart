@@ -6,6 +6,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/reviews/application/review_provider.dart';
+import 'package:seapedia_ui_compfest/core/utils/validators.dart';
 
 class WriteReviewScreen extends ConsumerStatefulWidget {
   const WriteReviewScreen({super.key});
@@ -32,10 +33,23 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
     final name = _nameController.text.trim();
     final comment = _commentController.text.trim();
 
-    if (name.isEmpty || comment.isEmpty || _rating == 0) {
-      setState(() => _error = 'Nama, rating, dan komentar wajib diisi');
+    final nameError = Validators.validateRequired(name, 'Nama');
+    final commentError = Validators.validateRequired(comment, 'Komentar');
+
+    if (nameError != null) {
+      setState(() => _error = nameError);
       return;
     }
+    if (commentError != null) {
+      setState(() => _error = commentError);
+      return;
+    }
+    if (_rating < 1 || _rating > 5) {
+      setState(() => _error = 'Rating wajib diisi (1-5)');
+      return;
+    }
+
+    final sanitizedComment = Validators.sanitizeHtml(comment);
 
     setState(() {
       _isSubmitting = true;
@@ -49,7 +63,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
         userId: session?.user.id,
         reviewerName: name,
         rating: _rating,
-        comment: comment,
+        comment: sanitizedComment,
       );
       ref.invalidate(reviewListProvider);
       if (mounted) context.pop();
@@ -96,11 +110,13 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
               label: 'Nama',
               controller: _nameController,
               prefixIcon: Icons.person_outline_rounded,
+              maxLength: 50,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _commentController,
               maxLines: 4,
+              maxLength: 1000,
               decoration: const InputDecoration(
                 labelText: 'Komentar',
                 alignLabelWithHint: true,

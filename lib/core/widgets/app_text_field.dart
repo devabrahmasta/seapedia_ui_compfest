@@ -7,6 +7,7 @@ class AppTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final IconData? prefixIcon;
   final int? maxLines;
+  final int? maxLength;
 
   const AppTextField({
     super.key,
@@ -16,6 +17,7 @@ class AppTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.prefixIcon,
     this.maxLines,
+    this.maxLength,
   });
 
   @override
@@ -40,6 +42,7 @@ class _AppTextFieldState extends State<AppTextField> {
       obscureText: isPasswordField ? _obscured : false,
       keyboardType: widget.keyboardType,
       maxLines: isPasswordField ? 1 : widget.maxLines,
+      maxLength: widget.maxLength,
       decoration: InputDecoration(
         labelText: widget.label,
         prefixIcon: widget.prefixIcon != null

@@ -72,9 +72,7 @@ class _OrderActionDriverState extends ConsumerState<OrderActionDriver> {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  label: _isLoading
-                      ? 'Memproses...'
-                      : 'Selesaikan Pengantaran',
+                  label: _isLoading ? 'Memproses...' : 'Selesaikan Pengantaran',
                   isLoading: _isLoading,
                   onPressed: _isLoading
                       ? null

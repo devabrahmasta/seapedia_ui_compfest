@@ -236,37 +236,6 @@ class _ActiveJobCard extends ConsumerStatefulWidget {
 }
 
 class _ActiveJobCardState extends ConsumerState<_ActiveJobCard> {
-  bool _isLoading = false;
-
-  Future<void> _completeJob() async {
-    final driverId = ref.read(authProvider).value?.user.id;
-    if (driverId == null) return;
-
-    setState(() => _isLoading = true);
-    try {
-      await ref
-          .read(deliveryJobRepositoryProvider)
-          .completeJob(widget.job.job.id, driverId, widget.job.deliveryFee);
-      ref.invalidate(activeJobProvider);
-      ref.invalidate(availableJobsProvider);
-      ref.invalidate(jobHistoryProvider);
-      ref.invalidate(driverEarningsSummaryProvider);
-      ref.invalidate(orderDetailProvider(widget.job.job.orderId));
-      ref.invalidate(jobByOrderIdProvider(widget.job.job.orderId));
-      if (mounted) {
-        context.go('/driver/job-completed', extra: widget.job.deliveryFee);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyelesaikan pengantaran: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final job = widget.job;
@@ -321,14 +290,15 @@ class _ActiveJobCardState extends ConsumerState<_ActiveJobCard> {
                   : (job.addressFull.isEmpty ? '–' : job.addressFull),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                label: _isLoading ? 'Memproses...' : 'Selesaikan Pengantaran',
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _completeJob,
+              SizedBox(
+                width: double.infinity,
+                child: AppButton(
+                  label: 'Detail Pengantaran',
+                  onPressed: () {
+                    context.push('/order/${job.job.orderId}');
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),

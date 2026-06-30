@@ -6,6 +6,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/core/widgets/app_button.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/core/utils/auth_error_mapper.dart';
+import 'package:seapedia_ui_compfest/core/utils/validators.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -41,12 +42,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (username.isEmpty ||
-        fullName.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
-      setState(() => _validationError = 'Semua field wajib diisi');
+    final nameError = Validators.validateRequired(fullName, 'Nama Lengkap');
+    final userError = Validators.validateRequired(username, 'Username');
+    final emailError = Validators.validateEmail(email);
+    final passError = Validators.validatePassword(password);
+
+    if (nameError != null) {
+      setState(() => _validationError = nameError);
+      return;
+    }
+    if (userError != null) {
+      setState(() => _validationError = userError);
+      return;
+    }
+    if (emailError != null) {
+      setState(() => _validationError = emailError);
+      return;
+    }
+    if (passError != null) {
+      setState(() => _validationError = passError);
       return;
     }
 
@@ -121,12 +135,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Nama Lengkap',
                 controller: _fullNameController,
                 prefixIcon: Icons.person_outline_rounded,
+                maxLength: 100,
               ),
               const SizedBox(height: 12),
               AppTextField(
                 label: 'Username',
                 controller: _usernameController,
                 prefixIcon: Icons.person_outline_rounded,
+                maxLength: 50,
               ),
               const SizedBox(height: 12),
               AppTextField(
@@ -134,6 +150,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: Icons.email_outlined,
+                maxLength: 100,
               ),
               const SizedBox(height: 12),
               AppTextField(
@@ -141,6 +158,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 prefixIcon: Icons.lock_outline,
+                maxLength: 100,
               ),
               const SizedBox(height: 12),
               AppTextField(
@@ -148,6 +166,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _confirmPasswordController,
                 obscureText: true,
                 prefixIcon: Icons.lock_outline,
+                maxLength: 100,
               ),
               const SizedBox(height: 16),
               Text(

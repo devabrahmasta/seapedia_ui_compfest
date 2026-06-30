@@ -312,10 +312,7 @@ class _RouteRow extends StatelessWidget {
               Text(name, style: Theme.of(context).textTheme.titleSmall),
               if (address.isNotEmpty) ...[
                 const SizedBox(height: 2),
-                Text(
-                  address,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(address, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ],
           ),

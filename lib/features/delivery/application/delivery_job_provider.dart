@@ -37,9 +37,7 @@ final jobByOrderIdProvider = FutureProvider.family<DeliveryJob?, String>((
 final activeJobProvider = FutureProvider<DeliveryJobSummary?>((ref) async {
   final session = ref.watch(authProvider).value;
   if (session == null) return null;
-  return ref
-      .read(deliveryJobRepositoryProvider)
-      .getActiveJob(session.user.id);
+  return ref.read(deliveryJobRepositoryProvider).getActiveJob(session.user.id);
 });
 
 final jobHistoryProvider = FutureProvider<List<DeliveryJobHistoryItem>>((
@@ -47,9 +45,7 @@ final jobHistoryProvider = FutureProvider<List<DeliveryJobHistoryItem>>((
 ) async {
   final session = ref.watch(authProvider).value;
   if (session == null) return [];
-  return ref
-      .read(deliveryJobRepositoryProvider)
-      .getJobHistory(session.user.id);
+  return ref.read(deliveryJobRepositoryProvider).getJobHistory(session.user.id);
 });
 
 final driverEarningsSummaryProvider = FutureProvider<DriverEarningsSummary>((

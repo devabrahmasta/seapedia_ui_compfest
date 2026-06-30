@@ -174,7 +174,8 @@ class DeliveryJobHistoryItem {
 }
 
 class DeliveryJobRepository {
-  DeliveryJobRepository(this._client) : _orderRepository = OrderRepository(_client);
+  DeliveryJobRepository(this._client)
+    : _orderRepository = OrderRepository(_client);
 
   final SupabaseClient _client;
   final OrderRepository _orderRepository;

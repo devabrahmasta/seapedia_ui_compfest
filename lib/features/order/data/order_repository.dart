@@ -399,7 +399,10 @@ class OrderRepository {
       'status': newStatus,
       'changed_at': DateTime.now().toIso8601String(),
     });
-    await _client.from('orders').update({'status': newStatus}).eq('id', orderId);
+    await _client
+        .from('orders')
+        .update({'status': newStatus})
+        .eq('id', orderId);
     if (newStatus == 'Menunggu Pengirim') {
       await _client.from('delivery_jobs').insert({
         'order_id': orderId,
@@ -423,14 +426,151 @@ class OrderRepository {
       totalIncome += (order['subtotal'] as num).toDouble();
     }
 
-    double averagePerOrder = completedOrderCount > 0 
-        ? totalIncome / completedOrderCount 
+    double averagePerOrder = completedOrderCount > 0
+        ? totalIncome / completedOrderCount
         : 0;
 
     return StoreIncomeSummary(
       totalIncome: totalIncome,
       completedOrderCount: completedOrderCount,
       averagePerOrder: averagePerOrder,
+    );
+  }
+
+  Future<List<OverdueOrder>> findOverdueOrders(DateTime simulatedNow) async {
+    final response = await _client
+        .from('orders')
+        .select(
+          'id, delivery_method, created_at, profiles!buyer_id(username, full_name), stores!store_id(store_name)',
+        )
+        .inFilter('status', [
+          'Sedang Dikemas',
+          'Menunggu Pengirim',
+          'Sedang Dikirim',
+        ]);
+
+    final rawList = response as List;
+    final overdueOrders = <OverdueOrder>[];
+
+    for (final raw in rawList) {
+      final order = OverdueOrder.fromJson(raw as Map<String, dynamic>);
+      final elapsedDays = simulatedNow.difference(order.createdAt).inDays;
+
+      int slaLimit = 5;
+      if (order.deliveryMethod == 'instant') slaLimit = 1;
+      if (order.deliveryMethod == 'next_day') slaLimit = 2;
+
+      if (elapsedDays > slaLimit) {
+        overdueOrders.add(order);
+      }
+    }
+
+    overdueOrders.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return overdueOrders;
+  }
+
+  Future<void> processOverdueRefund(String orderId) async {
+    // 1. Validasi
+    final orderRaw = await _client
+        .from('orders')
+        .select('status, total, buyer_id')
+        .eq('id', orderId)
+        .single();
+
+    if (orderRaw['status'] == 'Dikembalikan' ||
+        orderRaw['status'] == 'Pesanan Selesai') {
+      throw Exception(
+        'Order sudah diproses atau dikembalikan, tidak dapat di-refund lagi.',
+      );
+    }
+
+    // 2. Update status & history
+    await _client
+        .from('orders')
+        .update({'status': 'Dikembalikan'})
+        .eq('id', orderId);
+    await _client.from('order_status_history').insert({
+      'order_id': orderId,
+      'status': 'Dikembalikan',
+      'changed_at': DateTime.now().toIso8601String(),
+    });
+
+    // 3. Restore stock
+    final itemsRaw = await _client
+        .from('order_items')
+        .select('product_id, quantity')
+        .eq('order_id', orderId);
+    for (final item in (itemsRaw as List)) {
+      final productId = item['product_id'] as String;
+      final quantity = item['quantity'] as int;
+
+      final productRaw = await _client
+          .from('products')
+          .select('stock')
+          .eq('id', productId)
+          .single();
+      final currentStock = productRaw['stock'] as int;
+
+      await _client
+          .from('products')
+          .update({'stock': currentStock + quantity})
+          .eq('id', productId);
+    }
+
+    // 4. Update wallet balance
+    final total = (orderRaw['total'] as num).toDouble();
+    final buyerId = orderRaw['buyer_id'] as String;
+
+    final walletRaw = await _client
+        .from('wallets')
+        .select('id, balance')
+        .eq('user_id', buyerId)
+        .single();
+    final walletId = walletRaw['id'] as String;
+    final currentBalance = (walletRaw['balance'] as num).toDouble();
+
+    await _client
+        .from('wallets')
+        .update({'balance': currentBalance + total})
+        .eq('id', walletId);
+
+    // 5. Insert wallet transaction
+    await _client.from('wallet_transactions').insert({
+      'wallet_id': walletId,
+      'type': 'refund',
+      'amount': total,
+      'reference_id': orderId,
+    });
+  }
+}
+
+class OverdueOrder {
+  final String id;
+  final String buyerName;
+  final String storeName;
+  final String deliveryMethod;
+  final DateTime createdAt;
+
+  const OverdueOrder({
+    required this.id,
+    required this.buyerName,
+    required this.storeName,
+    required this.deliveryMethod,
+    required this.createdAt,
+  });
+
+  factory OverdueOrder.fromJson(Map<String, dynamic> json) {
+    final profileData = json['profiles'] as Map<String, dynamic>?;
+    final storeData = json['stores'] as Map<String, dynamic>?;
+    return OverdueOrder(
+      id: json['id'] as String,
+      buyerName:
+          profileData?['full_name'] as String? ??
+          profileData?['username'] as String? ??
+          'Pembeli',
+      storeName: storeData?['store_name'] as String? ?? 'Toko',
+      deliveryMethod: json['delivery_method'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 }

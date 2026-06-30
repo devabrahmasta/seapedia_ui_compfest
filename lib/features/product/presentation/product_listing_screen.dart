@@ -14,7 +14,8 @@ class ProductListingScreen extends ConsumerStatefulWidget {
   const ProductListingScreen({super.key, this.autofocus = false});
 
   @override
-  ConsumerState<ProductListingScreen> createState() => _ProductListingScreenState();
+  ConsumerState<ProductListingScreen> createState() =>
+      _ProductListingScreenState();
 }
 
 class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
@@ -59,7 +60,8 @@ class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
     var products = allProducts.where((product) {
       if (_query.isNotEmpty) {
         final keyword = _query.toLowerCase();
-        final matchesQuery = product.name.toLowerCase().contains(keyword) ||
+        final matchesQuery =
+            product.name.toLowerCase().contains(keyword) ||
             product.storeName.toLowerCase().contains(keyword);
         if (!matchesQuery) return false;
       }
@@ -95,10 +97,7 @@ class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
     final productsAsync = ref.watch(allProductsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Semua Produk'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Semua Produk'), centerTitle: true),
       body: Column(
         children: [
           Padding(
@@ -126,14 +125,15 @@ class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
           Expanded(
             child: productsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => const Center(child: Text('Gagal memuat produk')),
+              error: (err, stack) =>
+                  const Center(child: Text('Gagal memuat produk')),
               data: (allProducts) {
                 final filteredProducts = _getFilteredProducts(allProducts);
-                
+
                 if (filteredProducts.isEmpty) {
                   return const _EmptyState();
                 }
-                
+
                 return SingleChildScrollView(
                   padding: AppSpacing.screenPaddingHorizontal,
                   child: MasonryGridView.count(
@@ -189,7 +189,9 @@ class _FilterChipRow extends StatelessWidget {
           const SizedBox(width: 10),
           if (filter.priceSort != PriceSort.none) ...[
             _Chip(
-              label: filter.priceSort == PriceSort.lowToHigh ? 'Termurah' : 'Termahal',
+              label: filter.priceSort == PriceSort.lowToHigh
+                  ? 'Termurah'
+                  : 'Termahal',
               isActive: true,
               onTap: onRemovePriceSort,
             ),
@@ -249,7 +251,11 @@ class _Chip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 16, color: isActive ? AppColors.onPrimary : AppColors.textSecondary),
+              Icon(
+                icon,
+                size: 16,
+                color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
             ],
             Text(
@@ -280,9 +286,15 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.search_off, size: 48, color: AppColors.textTertiary),
           const SizedBox(height: 12),
-          Text('Produk tidak ditemukan', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            'Produk tidak ditemukan',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 4),
-          Text('Coba kata kunci atau filter lain', style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            'Coba kata kunci atau filter lain',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );

@@ -27,10 +27,14 @@ class ProductFilter {
     );
   }
 
-  bool get isActive => categories.isNotEmpty || priceSort != PriceSort.none || minRating > 0;
+  bool get isActive =>
+      categories.isNotEmpty || priceSort != PriceSort.none || minRating > 0;
 }
 
-Future<ProductFilter?> showProductFilterSheet(BuildContext context, ProductFilter current) {
+Future<ProductFilter?> showProductFilterSheet(
+  BuildContext context,
+  ProductFilter current,
+) {
   return showModalBottomSheet<ProductFilter>(
     context: context,
     isScrollControlled: true,
@@ -122,12 +126,20 @@ class _ProductFilterSheetState extends State<_ProductFilterSheet> {
               _SortChip(
                 label: 'Termurah',
                 isSelected: _priceSort == PriceSort.lowToHigh,
-                onTap: () => setState(() => _priceSort = _priceSort == PriceSort.lowToHigh ? PriceSort.none : PriceSort.lowToHigh),
+                onTap: () => setState(
+                  () => _priceSort = _priceSort == PriceSort.lowToHigh
+                      ? PriceSort.none
+                      : PriceSort.lowToHigh,
+                ),
               ),
               _SortChip(
                 label: 'Termahal',
                 isSelected: _priceSort == PriceSort.highToLow,
-                onTap: () => setState(() => _priceSort = _priceSort == PriceSort.highToLow ? PriceSort.none : PriceSort.highToLow),
+                onTap: () => setState(
+                  () => _priceSort = _priceSort == PriceSort.highToLow
+                      ? PriceSort.none
+                      : PriceSort.highToLow,
+                ),
               ),
             ],
           ),
@@ -172,7 +184,11 @@ class _SortChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _SortChip({required this.label, required this.isSelected, required this.onTap});
+  const _SortChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

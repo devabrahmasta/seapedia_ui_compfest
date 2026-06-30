@@ -7,6 +7,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/features/address/application/address_provider.dart';
 import 'package:seapedia_ui_compfest/features/address/data/address_repository.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
+import 'package:seapedia_ui_compfest/core/utils/validators.dart';
 
 class AddressFormScreen extends ConsumerStatefulWidget {
   final Address? existingAddress;
@@ -26,8 +27,12 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
   @override
   void initState() {
     super.initState();
-    _labelController = TextEditingController(text: widget.existingAddress?.label);
-    _fullAddressController = TextEditingController(text: widget.existingAddress?.fullAddress);
+    _labelController = TextEditingController(
+      text: widget.existingAddress?.label,
+    );
+    _fullAddressController = TextEditingController(
+      text: widget.existingAddress?.fullAddress,
+    );
     _isDefault = widget.existingAddress?.isDefault ?? false;
   }
 
@@ -42,9 +47,12 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
     final label = _labelController.text.trim();
     final fullAddress = _fullAddressController.text.trim();
 
-    if (label.isEmpty || fullAddress.isEmpty) {
+    final labelError = Validators.validateRequired(label, 'Label Alamat');
+    final addressError = Validators.validateRequired(fullAddress, 'Alamat Lengkap');
+
+    if (labelError != null || addressError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Label dan Alamat Lengkap harus diisi')),
+        SnackBar(content: Text(labelError ?? addressError!)),
       );
       return;
     }
@@ -90,9 +98,9 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
       }
     } finally {
       if (mounted) {
@@ -106,9 +114,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
     final isEditing = widget.existingAddress != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Ubah Alamat' : 'Tambah Alamat'),
-      ),
+      appBar: AppBar(title: Text(isEditing ? 'Ubah Alamat' : 'Tambah Alamat')),
       body: SingleChildScrollView(
         padding: AppSpacing.screenPaddingHorizontal.add(
           const EdgeInsets.symmetric(vertical: 24),
@@ -116,14 +122,12 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Label Alamat',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text('Label Alamat', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             AppTextField(
               label: 'Rumah, Kantor, dll',
               controller: _labelController,
+              maxLength: 50,
             ),
             const SizedBox(height: 20),
             Text(
@@ -135,6 +139,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
               label: 'Tulis alamat lengkap, patokan, kode pos...',
               controller: _fullAddressController,
               maxLines: 4,
+              maxLength: 255,
             ),
             const SizedBox(height: 24),
             Row(

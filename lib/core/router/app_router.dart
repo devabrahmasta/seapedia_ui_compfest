@@ -3,6 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/admin_dashboard_screen.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/admin_main_screen.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/voucher_promo_screen.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/voucher_form_screen.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/promo_form_screen.dart';
+import 'package:seapedia_ui_compfest/features/admin/presentation/promo_detail_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/application/auth_provider.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/login_screen.dart';
 import 'package:seapedia_ui_compfest/features/auth/presentation/main_screen.dart';
@@ -126,6 +132,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             !path.startsWith('/order/') &&
             !path.startsWith('/product')) {
           return '/driver/jobs';
+        }
+      }
+
+      if (activeRole == 'admin') {
+        if (path == '/select-role') return null;
+        if (!path.startsWith('/admin')) {
+          return '/admin/dashboard';
         }
       }
 
@@ -380,6 +393,56 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/driver/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Admin mainscreen
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AdminMainScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/dashboard',
+                builder: (context, state) => const AdminDashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/vouchers',
+                builder: (context, state) => const VoucherPromoScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new-voucher',
+                    builder: (context, state) => const VoucherFormScreen(),
+                  ),
+                  GoRoute(
+                    path: 'new-promo',
+                    builder: (context, state) => const PromoFormScreen(),
+                  ),
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) {
+                      final promo = state.extra as PromoCode;
+                      return PromoDetailScreen(promo: promo);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/profile',
                 builder: (context, state) => const ProfileScreen(),
               ),
             ],

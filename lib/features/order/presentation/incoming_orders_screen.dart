@@ -40,8 +40,12 @@ class IncomingOrdersScreen extends ConsumerWidget {
               ),
             );
           }
-          final perluDiproses = orders.where((o) => o.status == 'Sedang Dikemas').toList();
-          final menungguKurir = orders.where((o) => o.status != 'Sedang Dikemas').toList();
+          final perluDiproses = orders
+              .where((o) => o.status == 'Sedang Dikemas')
+              .toList();
+          final menungguKurir = orders
+              .where((o) => o.status != 'Sedang Dikemas')
+              .toList();
 
           return RefreshIndicator(
             onRefresh: () => ref.refresh(incomingOrdersProvider.future),
@@ -50,42 +54,55 @@ class IncomingOrdersScreen extends ConsumerWidget {
                 const EdgeInsets.symmetric(vertical: 16),
               ),
               children: [
-                const _SectionHeader(title: 'Perlu Diproses', iconColor: AppColors.primary),
+                const _SectionHeader(
+                  title: 'Perlu Diproses',
+                  iconColor: AppColors.primary,
+                ),
                 const SizedBox(height: 12),
                 if (perluDiproses.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(bottom: 24),
-                    child: Text('Tidak ada pesanan', style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text(
+                      'Tidak ada pesanan',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
                   )
                 else
-                  ...perluDiproses.map((o) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _IncomingOrderCard(
-                      order: o,
-                      dateFmt: _dateFmt,
-                      priceFmt: _priceFmt,
-                      onTap: () => context.push('/order/${o.id}'),
-                      accentColor: AppColors.primary,
+                  ...perluDiproses.map(
+                    (o) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _IncomingOrderCard(
+                        order: o,
+                        dateFmt: _dateFmt,
+                        priceFmt: _priceFmt,
+                        onTap: () => context.push('/order/${o.id}'),
+                        accentColor: AppColors.primary,
+                      ),
                     ),
-                  )),
+                  ),
                 const SizedBox(height: 12),
                 const _SectionHeader(title: 'Menunggu Kurir'),
                 const SizedBox(height: 12),
                 if (menungguKurir.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(bottom: 24),
-                    child: Text('Tidak ada pesanan', style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text(
+                      'Tidak ada pesanan',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
                   )
                 else
-                  ...menungguKurir.map((o) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _IncomingOrderCard(
-                      order: o,
-                      dateFmt: _dateFmt,
-                      priceFmt: _priceFmt,
-                      onTap: () => context.push('/order/${o.id}'),
+                  ...menungguKurir.map(
+                    (o) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _IncomingOrderCard(
+                        order: o,
+                        dateFmt: _dateFmt,
+                        priceFmt: _priceFmt,
+                        onTap: () => context.push('/order/${o.id}'),
+                      ),
                     ),
-                  )),
+                  ),
               ],
             ),
           );
@@ -115,9 +132,9 @@ class _SectionHeader extends StatelessWidget {
         ],
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -147,7 +164,9 @@ class _IncomingOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemLabel = order.itemNames.isEmpty ? '–' : order.itemNames.join(', ');
+    final itemLabel = order.itemNames.isEmpty
+        ? '–'
+        : order.itemNames.join(', ');
 
     return AppCard(
       onTap: onTap,
@@ -190,7 +209,11 @@ class _IncomingOrderCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(orderStatusIcon(order.status), size: 16, color: AppColors.textSecondary),
+              Icon(
+                orderStatusIcon(order.status),
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -200,7 +223,9 @@ class _IncomingOrderCard extends StatelessWidget {
               ),
               Text(
                 priceFmt.format(order.total),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 14),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontSize: 14),
               ),
             ],
           ),

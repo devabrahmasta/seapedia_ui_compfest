@@ -30,8 +30,10 @@ class OrderHistoryScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat pesanan: $e')),
         data: (orders) {
-          final completedOrders = orders.where((o) => o.status == 'Selesai' || o.status == 'Dibatalkan').toList();
-          
+          final completedOrders = orders
+              .where((o) => o.status == 'Selesai' || o.status == 'Dibatalkan')
+              .toList();
+
           if (completedOrders.isEmpty) {
             return const Center(
               child: Text(

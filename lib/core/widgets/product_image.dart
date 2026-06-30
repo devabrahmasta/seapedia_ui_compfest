@@ -5,11 +5,7 @@ class ProductImage extends StatelessWidget {
   final String? imageUrl;
   final BorderRadius? borderRadius;
 
-  const ProductImage({
-    super.key,
-    this.imageUrl,
-    this.borderRadius,
-  });
+  const ProductImage({super.key, this.imageUrl, this.borderRadius});
 
   @override
   Widget build(BuildContext context) {

@@ -17,7 +17,8 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key, required this.productId});
 
   @override
-  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
@@ -90,9 +91,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           const SizedBox(width: 4),
                           Text(
                             '0.0', // rating dummy
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.textPrimary),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -100,7 +100,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(width: 6),
-                          Text('·', style: Theme.of(context).textTheme.bodyMedium),
+                          Text(
+                            '·',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             _formatSoldCount(0), // terjual dummy
@@ -111,9 +114,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       const SizedBox(height: 24),
                       Consumer(
                         builder: (context, ref, child) {
-                          final storeAsync = ref.watch(getStoreByIdProvider(product.storeId));
+                          final storeAsync = ref.watch(
+                            getStoreByIdProvider(product.storeId),
+                          );
                           return GestureDetector(
-                            onTap: () => context.push('/store/${product.storeId}'),
+                            onTap: () =>
+                                context.push('/store/${product.storeId}'),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
@@ -124,40 +130,58 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               child: Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                                    child: const Icon(Icons.store, color: AppColors.primary),
+                                    backgroundColor: AppColors.primary
+                                        .withValues(alpha: 0.1),
+                                    child: const Icon(
+                                      Icons.store,
+                                      color: AppColors.primary,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         storeAsync.when(
                                           data: (store) => Text(
-                                            store?.storeName ?? product.storeName,
-                                            style: Theme.of(context).textTheme.titleSmall,
+                                            store?.storeName ??
+                                                product.storeName,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleSmall,
                                           ),
                                           loading: () => Text(
                                             'Memuat toko...',
-                                            style: Theme.of(context).textTheme.titleSmall,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleSmall,
                                           ),
                                           error: (_, _) => Text(
                                             product.storeName,
-                                            style: Theme.of(context).textTheme.titleSmall,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleSmall,
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           'Lihat Toko',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ],
                               ),
                             ),
@@ -219,9 +243,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ],
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: _ProductCartAction(product: product),
-                    ),
+                    Expanded(child: _ProductCartAction(product: product)),
                   ],
                 ),
               ),
@@ -247,11 +269,13 @@ class _ProductCartAction extends ConsumerWidget {
     }
 
     try {
-      await ref.read(cartProvider.notifier).addItem(
-        productId: product.id,
-        storeId: product.storeId,
-        storeName: product.storeName,
-      );
+      await ref
+          .read(cartProvider.notifier)
+          .addItem(
+            productId: product.id,
+            storeId: product.storeId,
+            storeName: product.storeName,
+          );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produk ditambahkan ke keranjang')),
@@ -291,11 +315,13 @@ class _ProductCartAction extends ConsumerWidget {
             onPressed: () async {
               Navigator.of(ctx).pop();
               try {
-                await ref.read(cartProvider.notifier).clearAndAddItem(
-                  productId: product.id,
-                  storeId: product.storeId,
-                  storeName: product.storeName,
-                );
+                await ref
+                    .read(cartProvider.notifier)
+                    .clearAndAddItem(
+                      productId: product.id,
+                      storeId: product.storeId,
+                      storeName: product.storeName,
+                    );
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Keranjang diperbarui')),
@@ -303,8 +329,7 @@ class _ProductCartAction extends ConsumerWidget {
               } catch (_) {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Gagal memperbarui keranjang')),
+                  const SnackBar(content: Text('Gagal memperbarui keranjang')),
                 );
               }
             },
@@ -331,16 +356,20 @@ class _ProductCartAction extends ConsumerWidget {
             if (cartItem.quantity <= 1) {
               ref.read(cartProvider.notifier).removeItem(cartItem.id);
             } else {
-              ref.read(cartProvider.notifier).updateQuantity(
-                cartItemId: cartItem.id,
-                quantity: cartItem.quantity - 1,
-              );
+              ref
+                  .read(cartProvider.notifier)
+                  .updateQuantity(
+                    cartItemId: cartItem.id,
+                    quantity: cartItem.quantity - 1,
+                  );
             }
           },
-          onIncrement: () => ref.read(cartProvider.notifier).updateQuantity(
-            cartItemId: cartItem.id,
-            quantity: cartItem.quantity + 1,
-          ),
+          onIncrement: () => ref
+              .read(cartProvider.notifier)
+              .updateQuantity(
+                cartItemId: cartItem.id,
+                quantity: cartItem.quantity + 1,
+              ),
         ),
       );
     }
@@ -412,7 +441,8 @@ class _CartIconButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartAsync = ref.watch(cartProvider);
-    final itemCount = cartAsync.value?.items.fold<int>(
+    final itemCount =
+        cartAsync.value?.items.fold<int>(
           0,
           (sum, item) => sum + item.quantity,
         ) ??
@@ -457,9 +487,7 @@ class _ThumbnailRow extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : Colors.transparent,
+                  color: isSelected ? AppColors.primary : Colors.transparent,
                   width: 2,
                 ),
               ),

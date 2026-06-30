@@ -14,8 +14,10 @@ final myOrdersProvider = FutureProvider<List<OrderSummary>>((ref) async {
   return ref.read(orderRepositoryProvider).getMyOrders(session.user.id);
 });
 
-final orderDetailProvider =
-    FutureProvider.family<OrderDetail, String>((ref, orderId) async {
+final orderDetailProvider = FutureProvider.family<OrderDetail, String>((
+  ref,
+  orderId,
+) async {
   return ref.read(orderRepositoryProvider).getOrderDetail(orderId);
 });
 
@@ -25,6 +27,9 @@ final incomingOrdersProvider = FutureProvider<List<OrderSummary>>((ref) async {
   return ref.read(orderRepositoryProvider).getIncomingOrders(store.id);
 });
 
-final storeIncomeProvider = FutureProvider.family<StoreIncomeSummary, String>((ref, storeId) async {
+final storeIncomeProvider = FutureProvider.family<StoreIncomeSummary, String>((
+  ref,
+  storeId,
+) async {
   return ref.read(orderRepositoryProvider).getStoreIncomeSummary(storeId);
 });

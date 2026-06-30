@@ -56,20 +56,36 @@ class ProfileScreen extends ConsumerWidget {
                           icon: Icons.group_outlined,
                           label: 'Kelola Pengguna',
                         ),
-                        const Divider(height: 1, thickness: 1, color: AppColors.border),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppColors.border,
+                        ),
                         _MenuTile(
                           icon: Icons.local_offer_outlined,
                           label: 'Kelola Diskon',
                         ),
-                        const Divider(height: 1, thickness: 1, color: AppColors.border),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppColors.border,
+                        ),
                       ],
                       _MenuTile(
                         icon: Icons.edit_outlined,
                         label: 'Edit Profil',
                       ),
-                      const Divider(height: 1, thickness: 1, color: AppColors.border),
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.border,
+                      ),
                       _MenuTile(icon: Icons.help_outline, label: 'Bantuan'),
-                      const Divider(height: 1, thickness: 1, color: AppColors.border),
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.border,
+                      ),
                       _MenuTile(
                         icon: Icons.info_outline,
                         label: 'Tentang SEAPEDIA',

@@ -122,7 +122,8 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
                                   orElse: () => '-',
                                 ),
                                 ratingStr: '4.6', // Mock rating
-                                completedOrderCount: summary.completedOrderCount,
+                                completedOrderCount:
+                                    summary.completedOrderCount,
                               );
                             },
                             loading: () => const Center(
@@ -362,7 +363,10 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> {
             child: InkWell(
               onTap: () => context.go('/seller/reports'),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

@@ -68,9 +68,19 @@ class SellerProfileSection extends ConsumerWidget {
                   color: Colors.transparent,
                   child: Column(
                     children: [
-                      _MenuTile(icon: Icons.storefront_outlined, label: 'Kelola Toko'),
-                      const Divider(height: 1, thickness: 1, color: AppColors.border),
-                      _MenuTile(icon: Icons.bar_chart_outlined, label: 'Pendapatan Toko'),
+                      _MenuTile(
+                        icon: Icons.storefront_outlined,
+                        label: 'Kelola Toko',
+                      ),
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.border,
+                      ),
+                      _MenuTile(
+                        icon: Icons.bar_chart_outlined,
+                        label: 'Pendapatan Toko',
+                      ),
                     ],
                   ),
                 ),

@@ -41,7 +41,7 @@ class Product {
 
 class ProductRepository {
   ProductRepository(this._client);
-  
+
   final SupabaseClient _client;
 
   Future<List<Product>> fetchMyProducts(String storeId) async {
@@ -50,7 +50,7 @@ class ProductRepository {
         .select('*, stores(store_name)')
         .eq('store_id', storeId)
         .order('created_at', ascending: false);
-        
+
     return (response as List).map((json) => Product.fromJson(json)).toList();
   }
 
@@ -59,7 +59,7 @@ class ProductRepository {
         .from('products')
         .select('*, stores(store_name)')
         .order('created_at', ascending: false);
-        
+
     return (response as List).map((json) => Product.fromJson(json)).toList();
   }
 
@@ -69,7 +69,7 @@ class ProductRepository {
         .select('*, stores(store_name)')
         .eq('id', id)
         .maybeSingle();
-        
+
     if (response == null) return null;
     return Product.fromJson(response);
   }
@@ -82,15 +82,19 @@ class ProductRepository {
     required int stock,
     String? imageUrl,
   }) async {
-    final response = await _client.from('products').insert({
-      'store_id': storeId,
-      'name': name,
-      'description': description,
-      'price': price,
-      'stock': stock,
-      'image_url': imageUrl,
-    }).select('*, stores(store_name)').single();
-    
+    final response = await _client
+        .from('products')
+        .insert({
+          'store_id': storeId,
+          'name': name,
+          'description': description,
+          'price': price,
+          'stock': stock,
+          'image_url': imageUrl,
+        })
+        .select('*, stores(store_name)')
+        .single();
+
     return Product.fromJson(response);
   }
 
@@ -102,14 +106,19 @@ class ProductRepository {
     required int stock,
     String? imageUrl,
   }) async {
-    final response = await _client.from('products').update({
-      'name': name,
-      'description': description,
-      'price': price,
-      'stock': stock,
-      'image_url': imageUrl,
-    }).eq('id', productId).select('*, stores(store_name)').single();
-    
+    final response = await _client
+        .from('products')
+        .update({
+          'name': name,
+          'description': description,
+          'price': price,
+          'stock': stock,
+          'image_url': imageUrl,
+        })
+        .eq('id', productId)
+        .select('*, stores(store_name)')
+        .single();
+
     return Product.fromJson(response);
   }
 
@@ -119,9 +128,10 @@ class ProductRepository {
 
   Future<String> uploadProductImage(String storeId, File file) async {
     final fileExt = file.path.split('.').last;
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}_$storeId.$fileExt';
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_$storeId.$fileExt';
     final filePath = '$storeId/$fileName';
-    
+
     await _client.storage.from('products').upload(filePath, file);
     return _client.storage.from('products').getPublicUrl(filePath);
   }

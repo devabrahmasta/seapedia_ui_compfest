@@ -10,6 +10,7 @@ import 'package:seapedia_ui_compfest/core/widgets/app_text_field.dart';
 import 'package:seapedia_ui_compfest/features/product/application/product_provider.dart';
 import 'package:seapedia_ui_compfest/features/product/data/product_repository.dart';
 import 'package:seapedia_ui_compfest/features/store/application/store_provider.dart';
+import 'package:seapedia_ui_compfest/core/utils/validators.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final Product? existingProduct;
@@ -62,13 +63,33 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Future<void> _handleSubmit() async {
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
-    final price = double.tryParse(_priceController.text.trim());
-    final stock = int.tryParse(_stockController.text.trim());
+    final priceStr = _priceController.text.trim();
+    final stockStr = _stockController.text.trim();
 
-    if (name.isEmpty || price == null || stock == null) {
-      setState(() => _error = 'Lengkapi semua data dengan benar');
+    final nameError = Validators.validateRequired(name, 'Nama Produk');
+    final descError = Validators.validateRequired(description, 'Deskripsi');
+    final priceError = Validators.validatePositiveNumber(priceStr, 'Harga');
+    final stockError = Validators.validatePositiveInteger(stockStr, 'Stok');
+
+    if (nameError != null) {
+      setState(() => _error = nameError);
       return;
     }
+    if (descError != null) {
+      setState(() => _error = descError);
+      return;
+    }
+    if (priceError != null) {
+      setState(() => _error = priceError);
+      return;
+    }
+    if (stockError != null) {
+      setState(() => _error = stockError);
+      return;
+    }
+
+    final price = double.parse(priceStr);
+    final stock = int.parse(stockStr);
 
     setState(() {
       _isSubmitting = true;
@@ -183,21 +204,28 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              AppTextField(label: 'Nama Produk', controller: _nameController),
+              AppTextField(
+                label: 'Nama Produk', 
+                controller: _nameController,
+                maxLength: 100,
+              ),
               const SizedBox(height: 12),
               AppTextField(
                 label: 'Deskripsi',
                 controller: _descriptionController,
                 maxLines: 3,
+                maxLength: 500,
               ),
               const SizedBox(height: 12),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: AppTextField(
                       label: 'Harga',
                       controller: _priceController,
                       keyboardType: TextInputType.number,
+                      maxLength: 12,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -206,6 +234,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       label: 'Stok',
                       controller: _stockController,
                       keyboardType: TextInputType.number,
+                      maxLength: 6,
                     ),
                   ),
                 ],

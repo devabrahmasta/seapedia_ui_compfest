@@ -40,9 +40,9 @@ class _DriverProfileSectionState extends State<DriverProfileSection> {
               const Divider(height: 24),
               Text(
                 'Total Pendapatan',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 4),
               Text('Rp -', style: Theme.of(context).textTheme.titleLarge),
@@ -56,7 +56,10 @@ class _DriverProfileSectionState extends State<DriverProfileSection> {
             borderRadius: BorderRadius.circular(15),
             child: Material(
               color: Colors.transparent,
-              child: _MenuTile(icon: Icons.history, label: 'Riwayat Pengantaran'),
+              child: _MenuTile(
+                icon: Icons.history,
+                label: 'Riwayat Pengantaran',
+              ),
             ),
           ),
         ),

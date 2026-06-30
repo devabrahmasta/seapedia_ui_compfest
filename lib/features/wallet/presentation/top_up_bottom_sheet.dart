@@ -76,14 +76,16 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Top up berhasil: ${_formatter.format(amount)}')),
+          SnackBar(
+            content: Text('Top up berhasil: ${_formatter.format(amount)}'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Top up gagal: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Top up gagal: $e')));
       }
     } finally {
       if (mounted) {
@@ -116,10 +118,7 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            'Top Up Saldo',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text('Top Up Saldo', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
@@ -142,8 +141,12 @@ class _TopUpBottomSheetState extends ConsumerState<TopUpBottomSheet> {
                   child: Text(
                     _formatter.format(nominal),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isSelected ? AppColors.onPrimary : AppColors.textPrimary,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppColors.onPrimary
+                          : AppColors.textPrimary,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
