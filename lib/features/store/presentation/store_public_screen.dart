@@ -122,7 +122,12 @@ class _StoreHeader extends StatelessWidget {
             child: const Icon(Icons.storefront_outlined, size: 32),
           ),
           const SizedBox(height: 12),
-          Text(store.storeName, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            store.storeName,
+            style: Theme.of(context).textTheme.titleLarge,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (store.address != null && store.address!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Row(

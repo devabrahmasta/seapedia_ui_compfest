@@ -470,7 +470,6 @@ class OrderRepository {
   }
 
   Future<void> processOverdueRefund(String orderId) async {
-    // 1. Validasi
     final orderRaw = await _client
         .from('orders')
         .select('status, total, buyer_id')
@@ -484,7 +483,6 @@ class OrderRepository {
       );
     }
 
-    // 2. Update status & history
     await _client
         .from('orders')
         .update({'status': 'Dikembalikan'})
@@ -495,7 +493,6 @@ class OrderRepository {
       'changed_at': DateTime.now().toIso8601String(),
     });
 
-    // 3. Restore stock
     final itemsRaw = await _client
         .from('order_items')
         .select('product_id, quantity')
@@ -517,7 +514,6 @@ class OrderRepository {
           .eq('id', productId);
     }
 
-    // 4. Update wallet balance
     final total = (orderRaw['total'] as num).toDouble();
     final buyerId = orderRaw['buyer_id'] as String;
 
@@ -534,7 +530,6 @@ class OrderRepository {
         .update({'balance': currentBalance + total})
         .eq('id', walletId);
 
-    // 5. Insert wallet transaction
     await _client.from('wallet_transactions').insert({
       'wallet_id': walletId,
       'type': 'refund',

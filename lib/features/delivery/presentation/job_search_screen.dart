@@ -177,6 +177,8 @@ class _GreetingHeader extends StatelessWidget {
               Text(
                 'Halo, ${driverName ?? 'Kurir'}',
                 style: Theme.of(context).textTheme.titleSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text('Kurir', style: Theme.of(context).textTheme.bodyMedium),

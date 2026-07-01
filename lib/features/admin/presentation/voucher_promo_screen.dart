@@ -90,29 +90,6 @@ class _VoucherPromoScreenState extends ConsumerState<VoucherPromoScreen>
         controller: _tabController,
         children: const [_VoucherList(), _PromoList()],
       ),
-      // floatingActionButton: Padding(
-      //   padding: const EdgeInsets.only(bottom: 16.0),
-      //   child: FloatingActionButton.extended(
-      //     onPressed: () {
-      //       if (_tabController.index == 0) {
-      //         context.go('/admin/vouchers/new-voucher');
-      //       } else {
-      //         context.go('/admin/vouchers/new-promo');
-      //       }
-      //     },
-      //     backgroundColor: const Color(0xFF60BA62),
-      //     icon: const Icon(Icons.add, color: Colors.white),
-      //     label: const Text(
-      //       'Buat Baru',
-      //       style: TextStyle(
-      //         color: Colors.white,
-      //         fontFamily: 'Poppins',
-      //         fontWeight: FontWeight.w600,
-      //       ),
-      //     ),
-      //   ),
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

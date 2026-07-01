@@ -26,7 +26,6 @@ class AdminDashboardScreen extends ConsumerWidget {
               return TextButton.icon(
                 onPressed: () {
                   ref.read(simulatedTimeOffsetProvider.notifier).increment();
-                  // Also refresh the counts
                   ref.invalidate(overdueOrderCountProvider);
                 },
                 icon: const Icon(Icons.fast_forward, color: Color(0xFF60BA62)),
@@ -391,6 +390,8 @@ class _OverdueOrdersCard extends ConsumerWidget {
                         fontSize: 12,
                         fontFamily: 'Poppins',
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Kurir: ${order.deliveryMethod} | Overdue: $elapsedDays hari lalu',

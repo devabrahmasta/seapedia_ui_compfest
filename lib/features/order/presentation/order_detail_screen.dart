@@ -177,11 +177,15 @@ class _DetailBody extends StatelessWidget {
                           style: Theme.of(
                             context,
                           ).textTheme.titleSmall?.copyWith(fontSize: 14),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       const SizedBox(height: 2),
                       Text(
                         detail.addressFull.isEmpty ? '–' : detail.addressFull,
                         style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -202,7 +206,6 @@ class _DetailBody extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _StatusBanner extends StatelessWidget {
   final String status;

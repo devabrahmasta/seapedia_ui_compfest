@@ -40,6 +40,8 @@ class ProductCard extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontSize: 14),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -47,6 +49,8 @@ class ProductCard extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -55,6 +59,8 @@ class ProductCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

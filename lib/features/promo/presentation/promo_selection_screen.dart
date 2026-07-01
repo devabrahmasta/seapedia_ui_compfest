@@ -266,11 +266,15 @@ class _PromoListCard extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   _description,
                   style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(

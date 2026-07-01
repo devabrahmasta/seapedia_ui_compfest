@@ -69,8 +69,6 @@ class Validators {
     return null;
   }
 
-  /// Sanitizes text by stripping all HTML tags to prevent XSS-style injection
-  /// that could break the layout.
   static String sanitizeHtml(String text) {
     return text.replaceAll(RegExp(r'<[^>]*>', multiLine: true, caseSensitive: false), '');
   }

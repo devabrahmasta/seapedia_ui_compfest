@@ -310,10 +310,20 @@ class _RouteRow extends StatelessWidget {
             children: [
               Text(label, style: Theme.of(context).textTheme.labelSmall),
               const SizedBox(height: 2),
-              Text(name, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                name,
+                style: Theme.of(context).textTheme.titleSmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
               if (address.isNotEmpty) ...[
                 const SizedBox(height: 2),
-                Text(address, style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  address,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ],
           ),

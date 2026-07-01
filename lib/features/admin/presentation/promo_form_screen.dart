@@ -41,9 +41,9 @@ class _PromoFormScreenState extends ConsumerState<PromoFormScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF60BA62), // header background color
-              onPrimary: Colors.white, // header text color
-              onSurface: Colors.black, // body text color
+              primary: Color(0xFF60BA62),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,

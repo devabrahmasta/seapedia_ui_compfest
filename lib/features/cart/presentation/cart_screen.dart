@@ -137,11 +137,15 @@ class _StoreHeader extends StatelessWidget {
           color: AppColors.textSecondary,
         ),
         const SizedBox(width: 8),
-        Text(
-          storeName,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+        Expanded(
+          child: Text(
+            storeName,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
