@@ -71,6 +71,7 @@ class _ProductListingScreenState extends ConsumerState<ProductListingScreen> {
       if (_filter.categories.isNotEmpty && !_filter.categories.contains(product.category)) {
         return false;
       }
+      
       */
 
       // Filter rating dimatikan sementara karena model Product asli belum punya field rating
